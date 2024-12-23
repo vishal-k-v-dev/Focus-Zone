@@ -5,26 +5,59 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:id="@+id/popup_layout"
-    android:background="@android:color/black">
+    android:background="#FF101010">
 
+    <View
+        android:layout_width="0dp"
+        android:layout_height="10dp"/>
+    
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:id="@+id/top_bar"
-        android:background="@android:color/black">
-        <TextView
-            android:id="@+id/countdownTextView"
+        android:id="@+id/top"
+        android:background="#FF101010">
+
+        <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="00:00"
-            android:textSize="24sp"
-            android:gravity="center"
+            android:textSize="20dp"
+            android:textStyle="bold"
             android:textColor="@android:color/white"
-            android:padding="16dp"/>
+            android:background="@android:color/transparent"
+            android:text="  Focus Zone" />
+        
+        <View
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="0dp" />
+
+        <ImageView
+            android:id="@+id/closeButton"
+            android:layout_width="17dp"
+            android:layout_height="17dp"
+            android:src="@drawable/close" />
+        
+        <View
+            android:layout_width="15dp"
+            android:layout_height="0dp" />
+
     </LinearLayout>
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="10dp"/>
+
+    <View
+        android:background="@android:color/white"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"/>
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="10dp"/>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -35,7 +68,61 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center_horizontal"/>
+            android:gravity="start"/>
     </ScrollView>
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="10dp"/>
+
+    <View
+        android:background="@android:color/white"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"/>
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="10dp"/>
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:id="@+id/top_bar"
+        android:background="#FF101010">
+
+        <View
+            android:layout_width="8dp"
+            android:layout_height="0dp"/>
+        
+
+        <Button
+            android:id="@+id/breakAlertButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Break " />
+
+        <View
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="0dp" />
+    
+        <Button
+            android:id="@+id/stopAlertButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Exit" />
+
+        <View
+            android:layout_width="8dp"
+            android:layout_height="0dp"/>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="10dp"/>
 
 </LinearLayout>

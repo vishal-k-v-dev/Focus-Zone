@@ -1,81 +1,159 @@
+// ignore_for_file: usebuild_context_synchronously, use_build_context_synchronously
+
+import 'package:focus/widgets/top_bar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'pages/pages.dart';
+import 'active_screen/active.dart';
 import 'package:flutter/material.dart';
-import 'appselector.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:usage_stats/usage_stats.dart';
-import 'permission.dart';
-import 'timeselector.dart';
+import 'permission/permission_page.dart';
+import 'widgets/time_selector.dart';
 import 'package:device_apps/device_apps.dart';
-import 'whitelistapp.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'warningscreen.dart';
-import 'ads.dart';
+import 'start_screen.dart';
+import 'package:notification_listener_service/notification_listener_service.dart';
+import 'subscription.dart';
+import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
+import '../paywall/subscription_manager.dart';
 
 late MethodChannel platform;
-bool permission1 = false;
-bool permission2 = false;
-bool permission3 = false;
-bool permission4 = false;
 
-List? pri_apps;
+//Permissions
+bool displayOverOtherApps = false;
+bool usageStats = false;
+bool ignoreBatteryOptimizations = false;
+bool notificationAccess = false;
+bool deviceAdmin = false;
 
-List<String> selectedApps = [];
-List<String> selectedAppnames = [];
+//focus session Details
+bool removeExitButton = false;
+bool autoStart = false;
+
+int breakSession = 0; 
+int breakDuration = 1;
+int minuteValue = 0; 
+int hourValue = 0;
+
+List<String> whitelistApps = []; 
+List<String> whitelistAppNames = []; 
+List<String> whitelistNotifications = [];
+List<String> blacklistApps = [];
 List<int> usageTimeLimits = [];
 
-int minute_value = 0;
-int hour_value = 0;
+//apps
+List? appsList;
+String phonePackage = "";
 
-String initialRoute = "/";
+//page controller
+late PageController pageController;
 
-AppOpenAdManager appOpenAdManager = AppOpenAdManager();
+//shared pereferences
+late SharedPreferences settingsPreferences;
 
-void main() async{
+// subscription manager
+SubscriptionManager subscriptionManager = SubscriptionManager();
+
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeApp();
+  runApp(const MyApp());
+}
 
+Future<void> initializeApp() async {
+  await subscriptionManager.initalize();
+
+  //UI preferences
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  
-  MobileAds.instance.initialize();  
-
-  platform = const MethodChannel('com.example.your_flutter_app/toast');
-
-  appOpenAdManager.loadAd();
-
-  var homeScreenPackage = await platform.invokeMethod('getHomePackage');
-  
-  pri_apps = await DeviceApps.getInstalledApplications(
-    includeSystemApps: true,
-    includeAppIcons: true,
-    onlyAppsWithLaunchIntent: true,
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Color.fromARGB(255, 16, 16, 16),
+      systemNavigationBarColor: Color.fromARGB(255, 16, 16, 16)
+    )
   );
-  pri_apps?.removeWhere((element) => (element.packageName == homeScreenPackage || element.packageName == "com.android.settings" || element.packageName == "com.android.vending" || element.packageName == "com.focus.lock"));
-  
-  permission1 = await Permission.systemAlertWindow.isGranted;
-  permission2 = await UsageStats.checkUsagePermission() ?? false;
-  permission3 = await Permission.ignoreBatteryOptimizations.isGranted;
-  permission4 = await platform.invokeMethod("AccessibilityEnabled");
 
-  if((!permission1 || !permission2 || !permission3 || !permission4)){
-    initialRoute = '/permissions';
+  //ads initalization
+  MobileAds.instance.initialize();
+
+  //Shared Preferences initalization
+  settingsPreferences = await SharedPreferences.getInstance();
+
+  //platform initalzation
+  platform = const MethodChannel("com.lock.focus");
+
+  phonePackage = await platform.invokeMethod('dialer');
+
+  //Add preferences to lists
+  if(settingsPreferences.getStringList("whitelisted_app_packages") != null){
+    whitelistApps.addAll(settingsPreferences.getStringList("whitelisted_app_packages")!.toList());
+    whitelistAppNames.addAll(settingsPreferences.getStringList("whitelisted_app_names")!.toList());
+    
+    List<int> usageLimitsPreferences = settingsPreferences.getStringList("whitelisted_app_usage_limits")!.map((e) => int.parse(e)).toList();
+    usageTimeLimits.addAll(usageLimitsPreferences);
+  }
+
+  if(settingsPreferences.getStringList("whitelist_app_notification_packages") != null){
+    whitelistNotifications.addAll(settingsPreferences.getStringList("whitelist_app_notification_packages")!.toList());
+  }
+
+  if(settingsPreferences.getStringList("blacklisted_apps") != null){
+    blacklistApps.addAll(settingsPreferences.getStringList("blacklisted_apps")!.toList());
   } else {
-    initialRoute = '/';
+    blacklistApps = ["com.android.settings"];
   }
   
-  runApp(MyApp());
+  if(settingsPreferences.getBool('remove_exit_button') != null){
+    removeExitButton = settingsPreferences.getBool('remove_exit_button')!;
+  }
+  else{
+    removeExitButton = false;
+  }
+
+  if(settingsPreferences.getInt('break_sessions') != null){
+    breakSession = settingsPreferences.getInt('break_sessions')!;
+  }
+  else{
+    breakSession = 0;
+  }
+
+  if(settingsPreferences.getInt('break_duration') != null){
+    breakDuration = settingsPreferences.getInt('break_duration')!;
+  }
+  else{
+    breakDuration = 1;
+  }
+
+  //Add phone package name
+  if(!whitelistApps.contains(phonePackage)){
+    whitelistApps.add(phonePackage);
+    whitelistAppNames.add("Phone");
+    usageTimeLimits.add(0);
+  }
+  if(!whitelistNotifications.contains(phonePackage)){
+    whitelistNotifications.add(phonePackage);
+  }
+  
+  //Permission handling
+  displayOverOtherApps = await Permission.systemAlertWindow.isGranted;
+  usageStats = await UsageStats.checkUsagePermission() ?? false;
+  ignoreBatteryOptimizations = await Permission.ignoreBatteryOptimizations.isGranted;
+  notificationAccess = await NotificationListenerService.isPermissionGranted();
+  deviceAdmin = await platform.invokeMethod('DeiceAdminEnabled');
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: initialRoute,
-      theme: ThemeData.dark(),
+      initialRoute: (displayOverOtherApps && usageStats && ignoreBatteryOptimizations && notificationAccess) ? '/' : '/permissions',
+      theme: ThemeData(brightness: Brightness.dark, primarySwatch: Colors.green),
       routes: {
         '/': (context) => const HomeScreen(),
-        '/whitelistapps': (context) => const WhiteListApps(),
         '/permissions': (context) => const PermissionGetter(),
-        '/addwhitelistapps': (context) => const AppListScreen(),
-        '/warningscreen': (context) => const WarningScreen()
       },
       debugShowCheckedModeBanner: false,
     );
@@ -89,83 +167,150 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>{
+class _HomeScreenState extends State<HomeScreen> {
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
-    appOpenAdManager.showAdIfAvailable();
+    FlutterInappPurchase.purchaseUpdated.listen((event) async{
+      if(event != null){
+        if(event.isAcknowledgedAndroid != null){
+          if(!(event.isAcknowledgedAndroid!)){
+            await subscriptionManager.refresh();
+            subscriptionManager.isProUser = true;
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const SubscriptionManagementPage()));
+          }
+        }
+      }
+    });
+    getApps();
+  }
+
+  @override
+  void dispose(){
+    pageController.dispose();
+    super.dispose();
+  }
+
+  Future<void> getApps() async {
+    pageController = PageController();
+
+    if(appsList == null){
+      appsList = await DeviceApps.getInstalledApplications(
+        includeSystemApps: true,
+        includeAppIcons: true,
+        onlyAppsWithLaunchIntent: true,
+      );
+
+      appsList?.sort((a, b) => a.appName.compareTo(b.appName));
+
+      String homeScreenPackage = await platform.invokeMethod('getHomePackage');
+      appsList?.removeWhere((app) => [homeScreenPackage].contains(app.packageName));
+    }
+
+    if (await platform.invokeMethod("isActive")) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const ActiveScreen()));
+    }
+
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor: const Color.fromARGB(255, 16, 16, 16),        
+        backgroundColor: const Color.fromARGB(255, 16, 16, 16),
         bottomNavigationBar: Padding(
-          padding: const EdgeInsets.only(left: 12.0, right: 12.0),
-          child: Row(
-            children: [
-              Expanded(
+          padding: const EdgeInsets.symmetric(horizontal: 26),
+          child: appsList != null ? ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.greenAccent,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+            ),
+            onPressed: onStartPress, //onStartPress, 
+            child: const Row(
+              mainAxisSize: MainAxisSize.max, 
+              mainAxisAlignment: MainAxisAlignment.center, 
+              children: [
+                //Icon(Icons.arrow_right, size: 25, color: Colors.black),
+                SizedBox(height: 42.5), 
+                Text("Start Focusing", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 17, color: Colors.black))
+              ]
+            )
+          ) : const SizedBox()
+        ),
+        body: appsList == null ? 
+          loadingScreen() : 
+          homePage()
+      ),
+    );
+  }
+
+  Widget loadingScreen() {
+    return const Center(
+      child: CircularProgressIndicator(
+        color: Colors.greenAccent,
+      ),
+    );
+  }
+
+  Widget homePage() {
+    return WillPopScope(
+      onWillPop: () async{
+        pageController.jumpToPage(0);
+        return false;
+      },
+      child: const Padding(
+        padding: EdgeInsets.only(left: 22, right: 22),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(height: 7.5),
+
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 0),
+              child: TopBar()
+            ),
+            
+            SizedBox(height: 5),
+
+            Expanded(
+              child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: ElevatedButton(
-                    onPressed: (){Navigator.pushNamed(context, '/whitelistapps');}, 
-                    style: ElevatedButton.styleFrom(backgroundColor: const Color.fromARGB(255, 42, 42, 42)),
-                    child: const Text("whitelist apps")
-                  ),
-                ),
-              ),
-              Expanded(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                  onPressed: (){
-                    if(hour_value + minute_value != 0)
-                    {                      
-                      showModalBottomSheet(
-                        context: context, 
-                        builder: (context) {
-                          return BottomSheet(
-                            onClosing: (){}, 
-                            backgroundColor: const Color.fromARGB(255, 30, 30, 30),
-                            builder: (context) {
-                              return const WarningScreen();
-                            }
-                          );
-                        }
-                      );
-                    }
-                  },
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  padding: EdgeInsets.symmetric(horizontal: 0),
+                  child: Column(
                     children: [
-                      Icon(Icons.lock_clock),
-                      Text("  Lock", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                      DurationInputWidget(),
+                      SizedBox(height: 30),
+                      SettingsPage(),
                     ],
                   ),
                 ),
               ),
-            ],
-          ),
-        ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              
-              NativeAdWidget(),
-
-              const Padding(
-                padding: EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 12),
-                child: TimeInputWidget(),
-              ),
-
-              BannerAdWidget()
-
-            ],
-          ),            
+            )
+          ],    
         ),
       ),
     );
+  }
+
+  Future<void> onStartPress() async {
+    if (await platform.invokeMethod('isActive')) {
+      _showSnackbar("Focus Zone is already active");
+    } else if (hourValue + minuteValue != 0) {
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: const Color.fromARGB(255, 30, 30, 30),
+        builder: (context) => const WarningScreen(),
+      );
+    } else {
+      _showSnackbar("Please select duration");
+    }
+  }
+
+  void _showSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 }
 
