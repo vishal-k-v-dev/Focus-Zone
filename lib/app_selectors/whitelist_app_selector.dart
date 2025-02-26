@@ -4,6 +4,8 @@ import '../widgets/widgets.dart';
 import '../widgets/time_limit_input.dart';
 import 'package:flutter/material.dart';
 import '../paywall/paywall_reminder.dart';
+import '../preferences.dart';
+
 
 class WhiteListedAppsList extends StatefulWidget {
   const WhiteListedAppsList({super.key});
@@ -18,7 +20,6 @@ class _WhiteListedAppsListState extends State<WhiteListedAppsList> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: const Color.fromARGB(255, 16, 16, 16),
-
         floatingActionButton: FloatingActionButton.small(
           onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => AppListScreen(onPop: () => setState((){})))),
           backgroundColor: Colors.greenAccent,
@@ -26,7 +27,7 @@ class _WhiteListedAppsListState extends State<WhiteListedAppsList> {
         ),
 
         body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
           child: SingleChildScrollView(
             child: Column(
               children: 
@@ -77,9 +78,9 @@ class _WhiteListedAppsListState extends State<WhiteListedAppsList> {
               ]
               +
               List.generate(
-                whitelistApps.length, 
+                allowedApps.length, 
                 (index) {
-                  if(whitelistApps[index] == phonePackage){
+                  if(allowedApps[index] == phonePackage){
                     return const SizedBox();
                   }
                   else{
@@ -98,11 +99,11 @@ class _WhiteListedAppsListState extends State<WhiteListedAppsList> {
                           children: [
                             Row(
                               children: [
-                                AppIcon(packageName: whitelistApps[index]),
+                                AppIcon(packageName: allowedApps[index]),
                                 const SizedBox(width: 12.5),
                                 Expanded(
                                   child: Text(
-                                    appsList!.firstWhere((element) => element.packageName == whitelistApps[index]).appName,
+                                    appsList!.firstWhere((element) => element.packageName == allowedApps[index]).appName,
                                     style: const TextStyle(color: Colors.white)
                                   )
                                 ),
@@ -118,7 +119,7 @@ class _WhiteListedAppsListState extends State<WhiteListedAppsList> {
                             Row(
                               children: [
                                 const Expanded(
-                                  child: Text("Duration limit", style: TextStyle(fontSize: 16.5, fontWeight: FontWeight.bold, color: Color.fromARGB(211, 255, 255, 255), letterSpacing: .6))
+                                  child: Text("Duration limit", style: TextStyle(fontSize: 16.5, fontWeight: FontWeight.bold, color: Color.fromARGB(239, 255, 255, 255), letterSpacing: .6))
                                 ),
                                 StatefulBuilder(
                                   builder: (context, setState) {
@@ -128,7 +129,7 @@ class _WhiteListedAppsListState extends State<WhiteListedAppsList> {
                                           context: context, 
                                           backgroundColor: const Color.fromARGB(255, 30, 30, 30),
                                           builder: ((context) {
-                                            int previousLimit = usageTimeLimits[index];
+                                            int previousLimit = durationLimits[index];
                                             return Padding(
                                               padding: const EdgeInsets.only(left: 23, right: 23, top: 17.5, bottom: 10),
                                               child: Column(
@@ -140,7 +141,8 @@ class _WhiteListedAppsListState extends State<WhiteListedAppsList> {
                                                       const Expanded(child: Text("Set Duration Limit", style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold))),
                                                       GestureDetector(
                                                         onTap: (){
-                                                          usageTimeLimits[index] = previousLimit;
+                                                          durationLimits[index] = previousLimit;
+                                                          preferenceManager.setIntList(key: 'whitelisted_app_usage_limits', value: durationLimits);
                                                           setState((){});
                                                           Navigator.pop(context);
                                                         },
@@ -150,7 +152,7 @@ class _WhiteListedAppsListState extends State<WhiteListedAppsList> {
                                                   ),
                                                   const SizedBox(height: 20),
                                                   DurationInputWidget(
-                                                    packageName: whitelistApps[index], 
+                                                    packageName: allowedApps[index], 
                                                     onChanged: (){
                                                       setState((){}); 
                                                     }
@@ -176,17 +178,17 @@ class _WhiteListedAppsListState extends State<WhiteListedAppsList> {
                                       ),
                                       child: Row(
                                         children: [
-                                          SizedBox(width: 5.5),
+                                          const SizedBox(width: 5.5),
 
-                                          usageTimeLimits[index] == 0 ? 
+                                          durationLimits[index] == 0 ? 
                                           const Text(
                                             "Set Limit",
-                                            style: TextStyle(color: Colors.greenAccent, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: .6)
+                                            style: TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: .6)
                                           )
                                           :
                                           Text(
-                                            "${usageTimeLimits[index] ~/ 3600000}H : ${(usageTimeLimits[index] % 3600000) ~/ 60000}M", 
-                                            style: const TextStyle(color: Colors.greenAccent, fontSize: 13, fontWeight: FontWeight.w900, letterSpacing: 1.3)
+                                            "${durationLimits[index] ~/ 3600000}H:${(durationLimits[index] % 3600000) ~/ 60000}M", 
+                                            style: const TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w900, letterSpacing: 2.2)
                                           ),
 
                                           const Icon(Icons.chevron_right, color: Color.fromARGB(211, 255, 255, 255)),
@@ -241,20 +243,20 @@ class AppListScreen extends StatefulWidget {
 class _AppListScreenState extends State<AppListScreen> {
 
   handleWhitelistApps(app){
-    if (whitelistApps.contains(app.packageName)) {
-      usageTimeLimits.removeAt(whitelistApps.indexOf(app.packageName));
-      whitelistApps.remove(app.packageName);
-      whitelistAppNames.remove(app.appName);
+    if(allowedApps.contains(app.packageName)) {
+      durationLimits.removeAt(allowedApps.indexOf(app.packageName));
+      allowedApps.remove(app.packageName);
+      allowedAppNames.remove(app.appName);
 
     } else {
-      usageTimeLimits.add(0);
-      whitelistApps.add(app.packageName);
-      whitelistAppNames.add(app.appName);
+      durationLimits.add(0);
+      allowedApps.add(app.packageName);
+      allowedAppNames.add(app.appName);
     }
   
-    settingsPreferences.setStringList('whitelisted_app_packages', whitelistApps);
-    settingsPreferences.setStringList('whitelisted_app_names', whitelistAppNames);
-    settingsPreferences.setStringList('whitelisted_app_usage_limits', usageTimeLimits.map((limit) => limit.toString()).toList());
+    preferenceManager.setStringList(key: 'whitelisted_app_packages', value: allowedApps);
+    preferenceManager.setStringList(key: 'whitelisted_app_names', value: allowedAppNames);
+    preferenceManager.setIntList(key: 'whitelisted_app_usage_limits', value: durationLimits);
   }
 
   @override
@@ -272,7 +274,7 @@ class _AppListScreenState extends State<AppListScreen> {
             child: Column(
               children: <Widget> [
                 Padding(
-                  padding: const EdgeInsets.only(left: 23, right: 22, top: 10, bottom: 10),
+                  padding: const EdgeInsets.only(left: 18, right: 18, top: 10, bottom: 10),
                   child: Column(
                     children: [
                       Row(
@@ -301,7 +303,7 @@ class _AppListScreenState extends State<AppListScreen> {
                   return Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(left: 24, right: 24, bottom: 25),
+                        padding: const EdgeInsets.only(left: 18, right: 18, bottom: 25),
                         child: Container(
                           width: double.infinity,
                           height: 52,
@@ -319,7 +321,7 @@ class _AppListScreenState extends State<AppListScreen> {
                               Expanded(child: Text(app.appName, style: const TextStyle(color: Colors.white))),
                               StatefulBuilder(
                                 builder: (context, setState) {
-                                  bool selected = whitelistApps.contains(app.packageName);
+                                  bool selected = allowedApps.contains(app.packageName);
                                   return Checkbox(
                                     value: selected,
                                     side: const BorderSide(width: 1, color: Colors.grey),
@@ -334,7 +336,7 @@ class _AppListScreenState extends State<AppListScreen> {
                                       }
                                       else{
                                         if(changedValue!){
-                                          if(whitelistApps.length < FreeLimits.whitelistAppsLimit || subscriptionManager.isProUser){
+                                          if(allowedApps.length < FreeLimits.whitelistAppsLimit || subscriptionManager.isProUser){
                                             handleWhitelistApps(app);
                                             setState((){});
                                           }

@@ -1,12 +1,10 @@
 import 'package:focus/pages/pages.dart';
-
-import '../ads.dart';
 import '../main.dart';
 import '../widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import '../free_limits.dart';
 import '../paywall/paywall_reminder.dart';
-
+import '../preferences.dart';
 
 
 class BlacklistedApps extends StatefulWidget {
@@ -21,7 +19,7 @@ class _BlacklistedAppsState extends State<BlacklistedApps> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async{
-        Navigator.push(context, MaterialPageRoute(builder: ((context) => const BreakSettingsPage())));
+        Navigator.push(context, MaterialPageRoute(builder: ((context) => const HomeScreen())));
         return false;
       },
       child: SafeArea(
@@ -33,7 +31,7 @@ class _BlacklistedAppsState extends State<BlacklistedApps> {
             child: const Icon(Icons.edit)
           ),
           body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,7 +55,7 @@ class _BlacklistedAppsState extends State<BlacklistedApps> {
                 ] 
                 +
                 List.generate(
-                  blacklistApps.length, 
+                  blacklistedApps.length, 
                   (index) {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 20),
@@ -73,11 +71,11 @@ class _BlacklistedAppsState extends State<BlacklistedApps> {
                         ),
                         child: Row(
                           children: [
-                            AppIcon(packageName: blacklistApps[index]),
+                            AppIcon(packageName: blacklistedApps[index]),
                             const SizedBox(width: 12.5),
                             Expanded(
                               child: Text(
-                                appsList!.firstWhere((element) => element.packageName == blacklistApps[index]).appName,
+                                appsList!.firstWhere((element) => element.packageName == blacklistedApps[index]).appName,
                                 style: const TextStyle(color: Colors.white)
                               )
                             ),
@@ -106,7 +104,6 @@ class _BlacklistedAppsState extends State<BlacklistedApps> {
 
 
 class BlacklistAppSelector extends StatefulWidget {
-
   final Function onPop;
 
   const BlacklistAppSelector({super.key, required this.onPop});
@@ -118,20 +115,22 @@ class BlacklistAppSelector extends StatefulWidget {
 class BlacklistAppSelectorState extends State<BlacklistAppSelector> {
 
   handleblacklistApps(app){
-    if (blacklistApps.contains(app.packageName)) {
-      blacklistApps.remove(app.packageName);
+    
+    if (blacklistedApps.contains(app.packageName)) {
+      blacklistedApps.remove(app.packageName);
     } else {
-      blacklistApps.add(app.packageName);
+      blacklistedApps.add(app.packageName);
     }
-    settingsPreferences.setStringList('blacklisted_apps', blacklistApps);
+
+    preferenceManager.setStringList(key: 'blacklisted_apps', value: blacklistedApps);
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        Navigator.pop(context);
         widget.onPop();
+        Navigator.pop(context);
         return false;
       },
       child: SafeArea(
@@ -141,7 +140,7 @@ class BlacklistAppSelectorState extends State<BlacklistAppSelector> {
             child: Column(
               children: <Widget>[
                 Padding(
-                  padding: const EdgeInsets.only(left: 24, right: 24, top: 10, bottom: 10),
+                  padding: const EdgeInsets.only(left: 18, right: 18, top: 10, bottom: 10),
                   child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -154,7 +153,10 @@ class BlacklistAppSelectorState extends State<BlacklistAppSelector> {
                             ),
                           ),
                           GestureDetector(
-                            onTap: (){Navigator.pop(context);},
+                            onTap: (){
+                              widget.onPop();
+                              Navigator.pop(context);
+                            },
                             child: const Icon(Icons.close)
                           )
                         ],
@@ -171,7 +173,7 @@ class BlacklistAppSelectorState extends State<BlacklistAppSelector> {
                   return Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(left: 24, right: 24, bottom: 25),
+                        padding: const EdgeInsets.only(left: 18, right: 18, bottom: 25),
                         child: Container(
                           width: double.infinity,
                           height: 52,
@@ -189,7 +191,7 @@ class BlacklistAppSelectorState extends State<BlacklistAppSelector> {
                               Expanded(child: Text(app.appName, style: const TextStyle(color: Colors.white))),
                               StatefulBuilder(
                                 builder: (context, setState) {
-                                  bool selected = blacklistApps.contains(app.packageName);
+                                  bool selected = blacklistedApps.contains(app.packageName);
                                   return Checkbox(
                                     value: selected,
                                     activeColor: Colors.white, checkColor: Colors.black,
@@ -202,7 +204,7 @@ class BlacklistAppSelectorState extends State<BlacklistAppSelector> {
                                       }
                                       else{
                                         if(changedValue!){
-                                          if(blacklistApps.length < FreeLimits.blacklistAppsLimit || subscriptionManager.isProUser){
+                                          if(blacklistedApps.length < FreeLimits.blacklistAppsLimit || subscriptionManager.isProUser){
                                             handleblacklistApps(app);
                                             setState((){});
                                           }

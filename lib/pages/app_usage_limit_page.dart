@@ -33,14 +33,14 @@ class _AppUsageLimitPageState extends State<AppUsageLimitPage> {
                 const SizedBox(height: 15),
                 Column(
                   children: List.generate(
-                    whitelistApps.length, 
+                    allowedApps.length, 
                     (index){
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 15),
                         child: 
-                        whitelistApps[index] != phonePackage ?
+                        allowedApps[index] != phonePackage ?
                         LimitAppWidget(
-                          packageName: whitelistApps[index],
+                          packageName: allowedApps[index],
                         ) :
                         const SizedBox()
                       );

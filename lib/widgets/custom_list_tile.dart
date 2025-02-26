@@ -5,12 +5,14 @@ class CustomListTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final VoidCallback onTap;
+  final bool disabled;
 
-  const CustomListTile({
+  CustomListTile({
     Key? key,
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.disabled = false
   }) : super(key: key);
 
   @override
@@ -33,14 +35,17 @@ class CustomListTile extends StatelessWidget {
         )
       ),
 
-      onPressed: onTap,
+      onPressed: (){
+        if(!disabled){
+          onTap();
+        }
+      },
 
       child: Container(
         width: double.infinity,
         height: 52,
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey, width: .7),
-          //color: const Color.fromARGB(255, 30, 30, 30),
           borderRadius: BorderRadius.circular(10)
         ),
         padding: const EdgeInsets.only(
@@ -52,17 +57,17 @@ class CustomListTile extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: disabled ? Colors.grey : Colors.white,
                   letterSpacing: .6
                 )
               ),
             ),
             Row(
               children: [
-                FittedBox(
+                !disabled ? FittedBox(
                   child: Text(
                     subtitle,
                     style: const TextStyle(
@@ -71,8 +76,11 @@ class CustomListTile extends StatelessWidget {
                       color: Colors.grey,
                     )
                   ),
-                ),
-                Icon(Icons.chevron_right, color: Colors.white)
+                ) : SizedBox(),
+                Icon(
+                  Icons.chevron_right, 
+                  color: disabled ? Colors.grey : Colors.white,
+                )
               ],
             )
           ],

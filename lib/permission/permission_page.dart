@@ -18,7 +18,7 @@ class PermissionGetter extends StatefulWidget {
 class _PermissionGetterState extends State<PermissionGetter> {
 
   void checkAllPermissions() {
-    if (displayOverOtherApps && usageStats && ignoreBatteryOptimizations && notificationAccess) {
+    if (displayOverOtherApps && usageStats) {
       Navigator.pushNamed(context, '/');
     }
   }
@@ -71,35 +71,7 @@ class _PermissionGetterState extends State<PermissionGetter> {
                       });
                       await UsageStats.grantUsagePermission();
                     },
-                  ),
-
-                  PermissionItem(
-                    visible: !ignoreBatteryOptimizations,
-                    title: 'Ignore battery optimization',
-                    onGrantPressed: () async {
-                      PermissionStatus status = await Permission.ignoreBatteryOptimizations.request();
-                      if (status.isGranted) {
-                        setState(() {
-                          ignoreBatteryOptimizations = true;
-                          checkAllPermissions();
-                        });
-                      }
-                    },
-                  ),
-
-                  PermissionItem(
-                    visible: !notificationAccess,
-                    title: 'Notification Access',
-                    onGrantPressed: () async {
-                      bool permissionGranted = await NotificationListenerService.requestPermission();
-                      if (permissionGranted) {
-                        setState(() {
-                          notificationAccess = true;
-                          checkAllPermissions();
-                        });
-                      }
-                    },
-                  ),
+                  )
                 ],
               ),
             ),

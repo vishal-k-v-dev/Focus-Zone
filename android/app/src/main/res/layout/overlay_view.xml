@@ -4,37 +4,98 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center_horizontal"
+    android:theme="@style/InitialTheme"
     android:background="#FF101010">
 
-    <View
-        android:layout_width="0dp"
+    <include
+        layout="@layout/top_bar"
+        android:id="@+id/top_bar"
+    />
+
+    <include
+        layout="@layout/count_down_view"
+        android:id="@+id/count_down_screen"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:visibility="visible"
+    />
 
-    <TextView
-        android:id="@+id/countdown_timer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="60" 
-        android:textSize="48sp"
-        android:textColor="#FFFFFF"
-        android:layout_gravity="center"
-        android:textStyle="bold" />
-
-    <View
-        android:layout_width="0dp"
+    <include
+        layout="@layout/apps_list"
+        android:id="@+id/apps_screen"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:visibility="gone"
+    />
 
-    <ImageView
-        android:id="@+id/icon"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:src="@drawable/options_icon" />
-
-    <View
-        android:layout_width="0dp"
+    <include
+        layout="@layout/videos_list"
+        android:id="@+id/videos_screen"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:visibility="gone"
+    />
+
+    <include
+        layout="@layout/videos_unavailable"
+        android:id="@+id/videos_unavailable_screen"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone"
+    />
+
+    <include
+        layout="@layout/breaks_list"
+        android:id="@+id/breaks_screen"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone"
+    />
+
+    <include
+        layout="@layout/breaks_unavailable"
+        android:id="@+id/breaks_unavailable_screen"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone"
+    />
+
+    <include
+        layout="@layout/break_active"
+        android:id="@+id/breaks_active_screen"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone"
+    />
+
+    <include
+        layout="@layout/exit_screen"
+        android:id="@+id/exit"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone"
+    />
+
+    <include
+        layout="@layout/exit_disabled_screen"
+        android:id="@+id/exit_disabled"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone"
+    />
+
+    <include
+        layout="@layout/bottom_navigation_bar"
+        android:id="@+id/bottom_navigation_bar"
+    />
 
 </LinearLayout>

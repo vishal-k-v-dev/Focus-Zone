@@ -1,7 +1,6 @@
 // ignore_for_file: usebuild_context_synchronously, use_build_context_synchronously
 
 import 'package:focus/widgets/top_bar.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'pages/pages.dart';
 import 'active_screen/active.dart';
 import 'package:flutter/material.dart';
@@ -17,8 +16,11 @@ import 'package:notification_listener_service/notification_listener_service.dart
 import 'subscription.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import '../paywall/subscription_manager.dart';
+import 'preferences.dart';
+import 'package:widget_size/widget_size.dart';
+import 'permission/accessibility_warning.dart';
 
-late MethodChannel platform;
+MethodChannel platform = const MethodChannel("com.lock.focus");
 
 //Permissions
 bool displayOverOtherApps = false;
@@ -26,121 +28,108 @@ bool usageStats = false;
 bool ignoreBatteryOptimizations = false;
 bool notificationAccess = false;
 bool deviceAdmin = false;
+bool accessibility = false;
 
 //focus session Details
-bool removeExitButton = false;
-bool autoStart = false;
-
 int breakSession = 0; 
 int breakDuration = 1;
 int minuteValue = 0; 
 int hourValue = 0;
-
-List<String> whitelistApps = []; 
-List<String> whitelistAppNames = []; 
-List<String> whitelistNotifications = [];
-List<String> blacklistApps = [];
-List<int> usageTimeLimits = [];
+List<String> allowedApps = []; 
+List<String> allowedAppNames = []; 
+List<String> allowedNotifications = [];
+List<String> youtubeVideosID = [];
+List<String> youtubeVideosTitle = [];
+List<String> youtubeVideosThumbnailLink = [];
+List<String> blacklistedApps = [];
+List<int> durationLimits = [];
+bool autoStart = false;
+bool removeExitButton = false;
+bool blockNotifications = false;
 
 //apps
 List? appsList;
 String phonePackage = "";
 
-//page controller
-late PageController pageController;
-
-//shared pereferences
-late SharedPreferences settingsPreferences;
-
 // subscription manager
 SubscriptionManager subscriptionManager = SubscriptionManager();
 
+double sheight = 0.0;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  setSystemChromePreferences();
   await initializeApp();
+  await getPermissions();
+  await getSettings();
   runApp(const MyApp());
 }
 
-Future<void> initializeApp() async {
-  await subscriptionManager.initalize();
-
-  //UI preferences
+setSystemChromePreferences(){
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Color.fromARGB(255, 16, 16, 16),
       systemNavigationBarColor: Color.fromARGB(255, 16, 16, 16)
     )
   );
+}
 
+Future<void> initializeApp() async {
   //ads initalization
   MobileAds.instance.initialize();
 
-  //Shared Preferences initalization
-  settingsPreferences = await SharedPreferences.getInstance();
+  //subscriptionManager initalization
+  await subscriptionManager.initalize();
 
-  //platform initalzation
-  platform = const MethodChannel("com.lock.focus");
+  //SharedPreferences initalization
+  await preferenceManager.initalise();
 
+  //get default phone package
   phonePackage = await platform.invokeMethod('dialer');
+}
 
-  //Add preferences to lists
-  if(settingsPreferences.getStringList("whitelisted_app_packages") != null){
-    whitelistApps.addAll(settingsPreferences.getStringList("whitelisted_app_packages")!.toList());
-    whitelistAppNames.addAll(settingsPreferences.getStringList("whitelisted_app_names")!.toList());
-    
-    List<int> usageLimitsPreferences = settingsPreferences.getStringList("whitelisted_app_usage_limits")!.map((e) => int.parse(e)).toList();
-    usageTimeLimits.addAll(usageLimitsPreferences);
-  }
-
-  if(settingsPreferences.getStringList("whitelist_app_notification_packages") != null){
-    whitelistNotifications.addAll(settingsPreferences.getStringList("whitelist_app_notification_packages")!.toList());
-  }
-
-  if(settingsPreferences.getStringList("blacklisted_apps") != null){
-    blacklistApps.addAll(settingsPreferences.getStringList("blacklisted_apps")!.toList());
-  } else {
-    blacklistApps = ["com.android.settings"];
-  }
-  
-  if(settingsPreferences.getBool('remove_exit_button') != null){
-    removeExitButton = settingsPreferences.getBool('remove_exit_button')!;
-  }
-  else{
-    removeExitButton = false;
-  }
-
-  if(settingsPreferences.getInt('break_sessions') != null){
-    breakSession = settingsPreferences.getInt('break_sessions')!;
-  }
-  else{
-    breakSession = 0;
-  }
-
-  if(settingsPreferences.getInt('break_duration') != null){
-    breakDuration = settingsPreferences.getInt('break_duration')!;
-  }
-  else{
-    breakDuration = 1;
-  }
-
-  //Add phone package name
-  if(!whitelistApps.contains(phonePackage)){
-    whitelistApps.add(phonePackage);
-    whitelistAppNames.add("Phone");
-    usageTimeLimits.add(0);
-  }
-  if(!whitelistNotifications.contains(phonePackage)){
-    whitelistNotifications.add(phonePackage);
-  }
-  
-  //Permission handling
+Future<void> getPermissions() async{
   displayOverOtherApps = await Permission.systemAlertWindow.isGranted;
+
   usageStats = await UsageStats.checkUsagePermission() ?? false;
+
   ignoreBatteryOptimizations = await Permission.ignoreBatteryOptimizations.isGranted;
+
   notificationAccess = await NotificationListenerService.isPermissionGranted();
+
   deviceAdmin = await platform.invokeMethod('DeiceAdminEnabled');
+
+  accessibility = await platform.invokeMethod('AccessibilityEnabled');
+}
+
+Future<void> getSettings() async{
+  allowedApps = preferenceManager.getStringList(key: "whitelisted_app_packages", defaultValue: [phonePackage]);
+
+  allowedAppNames = preferenceManager.getStringList(key: "whitelisted_app_names", defaultValue: ["Phone"]);
+
+  durationLimits = preferenceManager.getIntList(key: "whitelisted_app_usage_limits", defaultValue: [0]);
+
+  allowedNotifications = preferenceManager.getStringList(key: "whitelist_app_notification_packages", defaultValue: [phonePackage]);
+
+  youtubeVideosID = preferenceManager.getStringList(key: "youtube_videos_ID", defaultValue: []);
+
+  youtubeVideosTitle = preferenceManager.getStringList(key: "youtube_videos_title", defaultValue: []);
+
+  youtubeVideosThumbnailLink = preferenceManager.getStringList(key: "youtube_videos_thumbnail_link", defaultValue: []);
+  
+  blacklistedApps = preferenceManager.getStringList(key: "blacklisted_apps", defaultValue: ["com.android.settings"]);
+
+  breakSession = preferenceManager.getInt(key: "break_sessions", defaultValue: 1);
+
+  breakDuration = preferenceManager.getInt(key: "break_duration", defaultValue: 5);
+
+  removeExitButton = preferenceManager.getBool(key: "remove_exit_button", defaultValue: false);
+
+  blockNotifications = preferenceManager.getBool(key: "block_notifications", defaultValue: false) && notificationAccess;
+
+  autoStart = (preferenceManager.getBool(key: "auto_start", defaultValue: false)) && accessibility;
 }
 
 class MyApp extends StatelessWidget {
@@ -149,12 +138,24 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: (displayOverOtherApps && usageStats && ignoreBatteryOptimizations && notificationAccess) ? '/' : '/permissions',
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0), 
+          child: child!
+        );
+      },
+
+      initialRoute: (
+        displayOverOtherApps && usageStats
+      ) ? '/' : '/permissions',
+
       theme: ThemeData(brightness: Brightness.dark, primarySwatch: Colors.green),
+
       routes: {
         '/': (context) => const HomeScreen(),
         '/permissions': (context) => const PermissionGetter(),
       },
+
       debugShowCheckedModeBanner: false,
     );
   }
@@ -188,17 +189,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose(){
-    pageController.dispose();
     super.dispose();
   }
 
   Future<void> getApps() async {
-    pageController = PageController();
 
     if(appsList == null){
       appsList = await DeviceApps.getInstalledApplications(
-        includeSystemApps: true,
         includeAppIcons: true,
+        includeSystemApps: true,
         onlyAppsWithLaunchIntent: true,
       );
 
@@ -218,30 +217,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Scaffold(
-        backgroundColor: const Color.fromARGB(255, 16, 16, 16),
-        bottomNavigationBar: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 26),
-          child: appsList != null ? ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.greenAccent,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
-            ),
-            onPressed: onStartPress, //onStartPress, 
-            child: const Row(
-              mainAxisSize: MainAxisSize.max, 
-              mainAxisAlignment: MainAxisAlignment.center, 
-              children: [
-                //Icon(Icons.arrow_right, size: 25, color: Colors.black),
-                SizedBox(height: 42.5), 
-                Text("Start Focusing", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 17, color: Colors.black))
-              ]
-            )
-          ) : const SizedBox()
+      child: WidgetSize(
+        onChange: (Size size) {
+          sheight = size.height;
+        },
+        child: Scaffold(
+          backgroundColor: const Color.fromARGB(255, 16, 16, 16),
+          body: appsList == null ? 
+            loadingScreen() : 
+            homePage()
         ),
-        body: appsList == null ? 
-          loadingScreen() : 
-          homePage()
       ),
     );
   }
@@ -257,33 +242,52 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget homePage() {
     return WillPopScope(
       onWillPop: () async{
-        pageController.jumpToPage(0);
         return false;
       },
-      child: const Padding(
-        padding: EdgeInsets.only(left: 22, right: 22),
+      child: Padding(
+        padding: const EdgeInsets.only(left: 18, right: 18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            SizedBox(height: 7.5),
-
-            Padding(
+            const SizedBox(height: 7.5),
+            const Padding(
               padding: EdgeInsets.symmetric(horizontal: 0),
               child: TopBar()
             ),
-            
-            SizedBox(height: 5),
-
+            const SizedBox(height: 5),
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 0),
+                  padding: const EdgeInsets.symmetric(horizontal: 0),
                   child: Column(
                     children: [
-                      DurationInputWidget(),
-                      SizedBox(height: 30),
-                      SettingsPage(),
+                      const DurationInputWidget(),
+                      const SizedBox(height: 26),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.greenAccent,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+                              ),
+                              onPressed: onStartPress, //onStartPress, 
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.max, 
+                                mainAxisAlignment: MainAxisAlignment.center, 
+                                children: [
+                                Icon(Icons.arrow_right, size: 25, color: Colors.black),
+                                  SizedBox(height: 42.5), 
+                                  Text("Start Focusing", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 17, color: Colors.black))
+                                ]
+                              )
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 30),
+                      const SettingsPage()
                     ],
                   ),
                 ),
@@ -295,22 +299,26 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<void> onStartPress() async {
-    if (await platform.invokeMethod('isActive')) {
-      _showSnackbar("Focus Zone is already active");
-    } else if (hourValue + minuteValue != 0) {
-      showModalBottomSheet(
-        context: context,
-        backgroundColor: const Color.fromARGB(255, 30, 30, 30),
-        builder: (context) => const WarningScreen(),
-      );
-    } else {
-      _showSnackbar("Please select duration");
-    }
-  }
-
   void _showSnackbar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
-}
 
+  Future<void> onStartPress() async {
+    bool accessibilityEnabled = await platform.invokeMethod('AccessibilityEnabled');
+    if (!accessibilityEnabled) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const AccessibilityWarning()));
+    } 
+    else{
+      if (hourValue + minuteValue != 0) {
+        showModalBottomSheet(
+          context: context,
+          backgroundColor: const Color.fromARGB(255, 30, 30, 30),
+          builder: (context) => const WarningScreen(),
+        );
+      }
+      else {
+        _showSnackbar("Please select duration");
+      }
+    }
+  }
+}

@@ -20,46 +20,38 @@ class MainActivity : FlutterActivity() {
             
             if (call.method == "start") {
                 
-                val duration = ((call.arguments as Map<String, Any>)["milliseconds"]) as Int
-                val whitelisted_names = ((call.arguments as Map<String, Any>)["list"]) as List<String>
-                val whitelisted_packages = ((call.arguments as Map<String, Any>)["packagelist"]) as List<String>
-                val blacklisted_packages = ((call.arguments as Map<String, Any>)["blacklist_apps"]) as List<String>
+                val duration = ((call.arguments as Map<String, Any>)["duration"]) as Int
+                val whitelistedNames = ((call.arguments as Map<String, Any>)["whitelisted_names"]) as List<String>
+                val whitelistedPackages = ((call.arguments as Map<String, Any>)["whitelisted_packages"]) as List<String>
                 val app_usage_limits = ((call.arguments as Map<String, Any>)["usage_limits"]) as List<Int>
-                val break_session = ((call.arguments as Map<String, Any>)["break_session"]) as Int
-                val break_duration = ((call.arguments as Map<String, Any>)["break_duration"]) as Int
-                val exit = ((call.arguments as Map<String, Any>)["exitbutton"]) as Int
+                val blacklistedPackages = ((call.arguments as Map<String, Any>)["blacklisted_packages"]) as List<String>
+                val youtubeVideosID = ((call.arguments as Map<String, Any>)["youtube_videos_id"]) as List<String>
+                val youtubeVideosTitle = ((call.arguments as Map<String, Any>)["youtube_videos_title"]) as List<String>
+                val youtubeVideosThumbnailLink = ((call.arguments as Map<String, Any>)["youtube_videos_thumbnail_link"]) as List<String>
+                val breakSessions = ((call.arguments as Map<String, Any>)["break_sessions"]) as Int
+                val maximumBreakDuration = ((call.arguments as Map<String, Any>)["maximum_break_duration"]) as Int
+                val exitOption = ((call.arguments as Map<String, Any>)["exit_button"]) as Int
+                val shouldBlockNotifications = ((call.arguments as Map<String, Any>)["should_block_notifications"]) as Boolean
+                val whitelistedNotifications = ((call.arguments as Map<String, Any>)["whitelisted_notifications"]) as List<String>
 
                 saveInt(this, "duration", duration)
-                saveStringList(this, "whitelisted_packages", whitelisted_packages)
-                saveStringList(this, "blacklisted_packages", blacklisted_packages)
-                saveStringList(this, "whitelisted_names", whitelisted_names)
+                saveStringList(this, "whitelisted_names", whitelistedNames)
+                saveStringList(this, "whitelisted_packages", whitelistedPackages)
+                saveStringList(this, "blacklisted_packages", blacklistedPackages)
+                saveStringList(this, "youtube_videos_id", youtubeVideosID)
+                saveStringList(this, "youtube_videos_title", youtubeVideosTitle)
+                saveStringList(this, "youtube_videos_thumbnail_link", youtubeVideosThumbnailLink)
                 saveIntList(this, "app_usage_limits", app_usage_limits)
-                saveInt(this, "break_session", break_session)
-                saveInt(this, "break_duration", break_duration)
-                saveInt(this, "exit", exit)
+                saveInt(this, "break_session", breakSessions)
+                saveInt(this, "break_duration", maximumBreakDuration)
+                saveInt(this, "exit", exitOption)
                 saveInt(this, "break_status", 0)
+                saveString(this, "end_time", (duration.toLong() + System.currentTimeMillis()).toString())
+                saveBoolean(this, "should_block_notifications", shouldBlockNotifications)
+                saveStringList(this, "whitelisted_notifications", whitelistedNotifications)
                 
-                val serviceIntent = Intent(context, FloatingOverlayService::class.java)
-                val settingsBlockService = Intent(context, AppForegroundService::class.java)
-                
-                context?.startService(serviceIntent)
-                context?.startService(settingsBlockService)
+                sendBroadcast(Intent("com.lock.focus.START_SESSION"))
 
-                val block_notifications = ((call.arguments as Map<String, Any>)["block_notifications"]) as List<String>
-
-                if((((call.arguments as Map<String, Any>)["is_block_notification_enabled"]) as Int) == 1){
-                    val intent = Intent("com.example.BLOCK_NOTIFICATIONS")
-                    saveStringList(this, "whitelist_notifications", block_notifications)
-                    sendBroadcast(intent)
-                }
-
-
-                if((((call.arguments as Map<String, Any>)["auto_start"]) as Int) == 1){
-                    saveInt(this, "auto_start", 1)
-                } else{
-                    saveInt(this, "auto_start", 0)
-                }
-                
                 result.success(null)
             }
 
@@ -67,30 +59,10 @@ class MainActivity : FlutterActivity() {
                 result.success(isForegroundServiceRunning(this))
             }
 
-            // BREAK MANAGEMENT
-
-            else if(call.method == "isBreakActive"){
-                result.success(getInt(this, "break_status") > 0)
-            }
-
-            else if(call.method == "endBreak"){
-                saveInt(this, "break_status", 0)
-                saveInt(this, "break_session", getInt(this, "break_session") - 1)     
-                val intent = Intent(Intent.ACTION_MAIN).apply {
-                    addCategory(Intent.CATEGORY_HOME)
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                }
-                startActivity(intent)  
-                result.success(null)
-            }
-
             // LAUNCHER AND DIALER(PHONE APP) PACKAGE GETTER
             
             else if(call.method == "getHomePackage") {          
-                val intent = Intent(Intent.ACTION_MAIN)
-                intent.addCategory(Intent.CATEGORY_HOME)
-                val resolveInfo = context?.packageManager?.resolveActivity(intent, 0)
-                result.success(resolveInfo?.activityInfo?.packageName)                
+                result.success(getHomeScreenPackage(context))   
             }
 
             else if(call.method == "dialer") {
@@ -100,7 +72,7 @@ class MainActivity : FlutterActivity() {
 
             // ACCESSIBILITY PERMISSION MANAGEMENT
 
-            else if(call.method == "getPermission"){
+            else if(call.method == "get_permission"){
                 startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
             }
             

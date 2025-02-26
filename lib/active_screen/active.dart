@@ -19,38 +19,6 @@ class ActiveScreen extends StatefulWidget {
 class _ActiveScreenState extends State<ActiveScreen> {
 
   @override
-  void initState() {
-    super.initState();
-    initalizeTimer();
-  }
-
-  void initalizeTimer() async{
-    await Future.delayed(const Duration(seconds: 5));
-    timer = Timer.periodic(
-      const Duration(milliseconds: 250), 
-      (timer) async{
-        //Double check if service is not active
-        if(await platform.invokeMethod('isActive') == false && isServiceActive){
-          isServiceActive = false;
-        }        
-        if(await platform.invokeMethod('isActive') == false && !isServiceActive){
-          Navigator.pushNamed(context, '/');
-          timer.cancel();
-        }        
-
-        isBreakActive = await platform.invokeMethod('isBreakActive');
-        setState((){});        
-      }
-    );
-  }
-
-  @override
-  void dispose(){
-    timer.cancel();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async{

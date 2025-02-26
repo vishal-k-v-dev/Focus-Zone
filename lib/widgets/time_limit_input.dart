@@ -2,6 +2,7 @@
 import '../main.dart';
 import 'package:flutter/material.dart';
 import 'package:interactive_slider/interactive_slider.dart';
+import '../preferences.dart';
 
 class DurationInputWidget extends StatefulWidget {
 
@@ -25,8 +26,8 @@ class _DurationInputWidgetState extends State<DurationInputWidget> {
   @override
   void initState(){
     super.initState();
-    hourValue = usageTimeLimits[whitelistApps.indexOf(widget.packageName)] ~/ 3600000;
-    minuteValue = (usageTimeLimits[whitelistApps.indexOf(widget.packageName)] % 3600000) ~/ 60000;
+    hourValue = durationLimits[allowedApps.indexOf(widget.packageName)] ~/ 3600000;
+    minuteValue = (durationLimits[allowedApps.indexOf(widget.packageName)] % 3600000) ~/ 60000;
 
     int roundedMinuteValue = (minuteValue ~/ 10) * 10;
     interactiveSliderController.value = (((hourValue * 60 + roundedMinuteValue)/(4*60)) * 100)/100;
@@ -35,8 +36,8 @@ class _DurationInputWidgetState extends State<DurationInputWidget> {
 
   @override
   Widget build(BuildContext context) {
-    hourValue = usageTimeLimits[whitelistApps.indexOf(widget.packageName)] ~/ 3600000;
-    minuteValue = (usageTimeLimits[whitelistApps.indexOf(widget.packageName)] % 3600000) ~/ 60000;
+    hourValue = durationLimits[allowedApps.indexOf(widget.packageName)] ~/ 3600000;
+    minuteValue = (durationLimits[allowedApps.indexOf(widget.packageName)] % 3600000) ~/ 60000;
 
     return Column(
       children: [
@@ -126,13 +127,15 @@ class _DurationInputWidgetState extends State<DurationInputWidget> {
                       )
                     ),
                     onPressed: (){
-                      if(usageTimeLimits[whitelistApps.indexOf(widget.packageName)] ~/ 3600000 != 4) {
-                        usageTimeLimits[whitelistApps.indexOf(widget.packageName)] = usageTimeLimits[whitelistApps.indexOf(widget.packageName)] + 60000;
+                      if(durationLimits[allowedApps.indexOf(widget.packageName)] ~/ 3600000 != 4) {
+                        durationLimits[allowedApps.indexOf(widget.packageName)] = durationLimits[allowedApps.indexOf(widget.packageName)] + 60000;
                       }
                       
                       if((minuteValue + 1) % 10 == 0){
                         interactiveSliderController.value = (((hourValue * 60 + minuteValue)/(4*60)) * 100)/100;                     
                       }
+
+                      preferenceManager.setIntList(key: 'whitelisted_app_usage_limits', value: durationLimits);
 
                       setState((){});
                       widget.onChanged();
@@ -166,13 +169,15 @@ class _DurationInputWidgetState extends State<DurationInputWidget> {
                       )
                     ),
                     onPressed: (){
-                      if(((usageTimeLimits[whitelistApps.indexOf(widget.packageName)] % 3600000) ~/ 60000) > 0){
-                        usageTimeLimits[whitelistApps.indexOf(widget.packageName)] = usageTimeLimits[whitelistApps.indexOf(widget.packageName)] - 60000;
+                      if(((durationLimits[allowedApps.indexOf(widget.packageName)] % 3600000) ~/ 60000) > 0){
+                        durationLimits[allowedApps.indexOf(widget.packageName)] = durationLimits[allowedApps.indexOf(widget.packageName)] - 60000;
                       }
 
-                      if(((usageTimeLimits[whitelistApps.indexOf(widget.packageName)] % 3600000) ~/ 60000) % 10 == 0){
+                      if(((durationLimits[allowedApps.indexOf(widget.packageName)] % 3600000) ~/ 60000) % 10 == 0){
                         interactiveSliderController.value = (((hourValue * 60 + minuteValue)/(4*60)) * 100)/100;                     
                       }
+          
+                      preferenceManager.setIntList(key: 'whitelisted_app_usage_limits', value: durationLimits);
 
                       setState((){});
                       widget.onChanged();
@@ -214,9 +219,12 @@ class _DurationInputWidgetState extends State<DurationInputWidget> {
           max: 24.0,
           initialProgress: 0.0,
           onChanged: (value){
-            usageTimeLimits[whitelistApps.indexOf(widget.packageName)] = value.toInt() * 10 * 60000;
+            durationLimits[allowedApps.indexOf(widget.packageName)] = value.toInt() * 10 * 60000;
             setState((){});
             widget.onChanged();
+          },
+          onProgressUpdated: (vl){
+            preferenceManager.setIntList(key: 'whitelisted_app_usage_limits', value: durationLimits);
           },
         ),
 
@@ -227,10 +235,11 @@ class _DurationInputWidgetState extends State<DurationInputWidget> {
             Expanded(
               child: TextButton(
                 onPressed: (){
-                  usageTimeLimits[whitelistApps.indexOf(widget.packageName)] = 0;
+                  durationLimits[allowedApps.indexOf(widget.packageName)] = 0;
                   widget.onChanged();
                   setState(() {});
                   interactiveSliderController.value = 0.0;
+                  preferenceManager.setIntList(key: 'whitelisted_app_usage_limits', value: durationLimits);
                   Navigator.pop(context);
                 }, 
 

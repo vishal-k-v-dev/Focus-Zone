@@ -1,15 +1,19 @@
 // ignore_for_file: use_build_context_synchronously
-
+import 'dart:async';
 import 'package:focus/pages/break_settings.dart';
 import 'package:focus/pages/pages.dart';
 import 'strictness_page.dart';
 import '../main.dart';
 import '../widgets/widgets.dart';
-import 'dart:async';
 import 'package:flutter/material.dart';
 import '../app_selectors/notification_app_selector.dart';
 import '../app_selectors/whitelist_app_selector.dart';
-
+import 'package:ogp_data_extract/ogp_data_extract.dart';
+import '../youtube_videos/yt_videos.dart';
+import '../preferences.dart';
+import '../permission/device_admin_warning.dart';
+import 'package:notification_listener_service/notification_listener_service.dart';
+import '../permission/notification_access_warning.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -27,10 +31,8 @@ class _SettingsPageState extends State<SettingsPage> {
     timer = Timer.periodic(
       const Duration(milliseconds: 250), 
       (timer) async{
-                
         deviceAdmin = await platform.invokeMethod('DeiceAdminEnabled');   
         setState((){});
-        
       }
     );
   }
@@ -41,129 +43,121 @@ class _SettingsPageState extends State<SettingsPage> {
     super.dispose();
   }
 
-  int getStrictness(){
-    int strictness = 0;
-
-    if(removeExitButton){
-      strictness++;
-    }
-    if(autoStart){
-      strictness++;
-    }
-    if(deviceAdmin){
-      strictness++;
-    }
-    return strictness;
-  }
-
   @override
   Widget build(BuildContext context) {
-    return 
-       Column(
-        children: [
-          //Whitelist Apps
-          CustomListTile(
-            title: "Whitelist Apps",
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => WhiteListedAppsList())),
-            subtitle: "${whitelistApps.length} ${whitelistApps.length == 1 ? "app" : "apps"}"
-          ),
+    return Column(
+      children: [
+        //Whitelist Apps
+        CustomListTile(
+          title: "Whitelist Apps",
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => WhiteListedAppsList())),
+          subtitle: "${allowedApps.length} ${allowedApps.length == 1 ? "app" : "apps"}"
+        ),
 
+        const  SizedBox(height: 25),
 
-          const  SizedBox(height: 25),
+        CustomListTile(
+          title: "Youtube Videos", 
+          subtitle: "${youtubeVideosID.length} ${youtubeVideosID.length == 1 ? "video" : "videos"}", 
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AllowYTVideos()))
+        ),
 
-          //Block Notifications    
-          CustomListTile(
-            title: "Whitelist Notifications",
-            subtitle: "${whitelistNotifications.length} ${whitelistNotifications.length == 1 ? "app" : "apps"}",
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const WhitelistedNotificationList()))
-          ),
+        const  SizedBox(height: 25),
 
-          const  SizedBox(height: 25),
+        CustomListTile(
+          title: "Exit Option", 
+          subtitle: "${removeExitButton ? "Disabled" : "Enabled"}", 
+          onTap: (){
+            setState(() => removeExitButton = !removeExitButton);
+            preferenceManager.setBool(key: 'remove_exit_button', value: removeExitButton);
+          }
+        ),
 
-          //Break Settings
-          CustomListTile(
-            title: "Breaks", 
-            subtitle: breakSession == 0 ? "none" : "$breakSession x $breakDuration min", 
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const BreakSettingsPage()))
-          ),
+        const  SizedBox(height: 25),
 
-          const  SizedBox(height: 25),
+        CustomListTile(
+          title: "Prevent Uninstall", 
+          subtitle: deviceAdmin ? "Enabled" : "Disabled", 
+          onTap: () async{
+            if(!deviceAdmin){
+              showModalBottomSheet(
+                context: context,
+                builder: (context) => const DeviceAdminWarning(),
+              );
+            }
+            else{
+              platform.invokeMethod("RemovePermission");
+            }
+          }
+        ),
 
-          //Break Settings
-          CustomListTile(
-            title: "Strictness", 
-            subtitle: "${getStrictness()} / 3", 
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const StrictnessPage()))
-          ),
-    
-          // //Hide Exit Button
-          // ToggleTile(
-          //   title: "Remove exit button", 
-          //   icon: Icons.exit_to_app, 
-          //   initialValue: removeExitButton, 
-          //   onChanged: (value) async{
-          //     settingsPreferences.setBool('remove_exit_button', value);
+        const  SizedBox(height: 25),
 
-          //     setState(() => removeExitButton = value);
-          //     return removeExitButton;
-          //   }
-          // ),
+        const Row(
+          children: [
+            Expanded(
+              child: Text(
+                "Notifications",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: .6),
+              ),
+            ),
+            Icon(Icons.notifications, size: 22)
+          ],
+        ),
 
+        const  SizedBox(height: 25),
 
-          // //Auto start    
-          // ToggleTile(
-          //   title: "Auto Start", 
-          //   icon: Icons.restart_alt, 
-          //   initialValue: autoStart, 
-          //   onChanged: (value) async{
-          //     if (value) {
-          //       bool accessibilityEnabled = await platform.invokeMethod('AccessibilityEnabled');
-          //       if (!accessibilityEnabled) {
-          //         showModalBottomSheet(
-          //           context: context,
-          //           builder: (context) => const AccessibilityWarning(),
-          //         );
-          //         return false;
-          //       } 
-          //       else{
-          //         setState(() => autoStart = value);
-          //         return true;
-          //       }
-          //     }
-          //     else{
-          //       setState(() => autoStart = value);
-          //       return false;
-          //     }
-          //   }
-          // ),
+        CustomListTile(
+          title: "Block Notifications",
+          subtitle: blockNotifications ? "blocked" : "Not blocked",
+          onTap: () async{
+            if(await NotificationListenerService.isPermissionGranted() == false){
+              showModalBottomSheet(
+                context: context, 
+                builder: (context){
+                  return NotificationAccessWarning();
+                }
+              );
+            }
+            else{
+              setState((){
+                blockNotifications = !blockNotifications;
+              });
+              preferenceManager.setBool(key: 'block_notifications', value: blockNotifications);
+            }
+          }
+        ),
 
+        const  SizedBox(height: 25),
 
-          // //Prevent Uninstall
-          // SwitchListTile(
-          //   title: const TileTitle(icon: Icons.delete_forever, title: "Prevent Uninstall"),
-          //   contentPadding: const EdgeInsets.only(left: 12, right: 2),
-          //   subtitle: deviceAdmin ? const Padding(padding: EdgeInsets.only(left: 39), child: Text("Disable to uninstall")) : null,
-          //   value: deviceAdmin, activeColor: Colors.greenAccent,
-          //   onChanged: (value) async{
-          //     if (value) {
-          //       if (!deviceAdmin) {
-          //         showModalBottomSheet(
-          //           context: context,
-          //           builder: (context) => const DeviceAdminWarning(),
-          //         );
-          //       } 
-          //       else{
-          //         setState(() => deviceAdmin = value);
-          //       }
-          //     }
-          //     else{
-          //       setState(() => deviceAdmin = value);
-          //       await platform.invokeMethod("RemovePermission");
-          //     }
-          //   }
-          // ),
-        ]
-    //  ),
+        //Block Notifications    
+        CustomListTile(
+          title: "Whitelist Notifications",
+          subtitle: "${allowedNotifications.length} ${allowedNotifications.length == 1 ? "app" : "apps"}",
+          disabled: !blockNotifications,
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const WhitelistedNotificationList()))
+        ),
+
+        const  SizedBox(height: 25),
+
+        const Row(
+          children: [
+            Expanded(
+              child: Text(
+                "Breaks",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: .6),
+              ),
+            ),
+            Icon(Icons.pause_circle_outline, size: 22)
+          ],
+        ),
+        
+        const  SizedBox(height: 25),
+
+        const BreakSettingsPage(),
+
+        const  SizedBox(height: 25),
+      ]
     );
   }
 }

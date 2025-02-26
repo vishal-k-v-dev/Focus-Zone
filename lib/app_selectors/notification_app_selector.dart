@@ -4,6 +4,8 @@ import '../widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import '../free_limits.dart';
 import '../paywall/paywall_reminder.dart';
+import '../preferences.dart';
+
 
 class WhitelistedNotificationList extends StatefulWidget {
   const WhitelistedNotificationList({super.key});
@@ -48,7 +50,7 @@ class _WhitelistedNotificationListState extends State<WhitelistedNotificationLis
               ] 
               +
               List.generate(
-                whitelistNotifications.length, 
+                allowedNotifications.length, 
                 (index) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 20),
@@ -64,11 +66,11 @@ class _WhitelistedNotificationListState extends State<WhitelistedNotificationLis
                       ),
                       child: Row(
                         children: [
-                          AppIcon(packageName: whitelistNotifications[index]),
+                          AppIcon(packageName: allowedNotifications[index]),
                           const SizedBox(width: 12.5),
                           Expanded(
                             child: Text(
-                              appsList!.firstWhere((element) => element.packageName == whitelistNotifications[index]).appName,
+                              appsList!.firstWhere((element) => element.packageName == allowedNotifications[index]).appName,
                               style: const TextStyle(color: Colors.white)
                             )
                           ),
@@ -106,12 +108,12 @@ class BlockNotifications extends StatefulWidget {
 class BlockNotificationsState extends State<BlockNotifications> {
 
   handleWhitelistNotifications(app){
-    if (whitelistNotifications.contains(app.packageName)) {
-      whitelistNotifications.remove(app.packageName);
+    if (allowedNotifications.contains(app.packageName)) {
+      allowedNotifications.remove(app.packageName);
     } else {
-      whitelistNotifications.add(app.packageName);
+      allowedNotifications.add(app.packageName);
     }
-    settingsPreferences.setStringList('whitelist_app_notification_packages', whitelistNotifications);
+    preferenceManager.setStringList(key: 'whitelist_app_notification_packages', value: allowedNotifications);
   }
 
   @override
@@ -129,7 +131,7 @@ class BlockNotificationsState extends State<BlockNotifications> {
             child: Column(
               children: <Widget>[
                 Padding(
-                  padding: const EdgeInsets.only(left: 24, right: 24, top: 10, bottom: 10),
+                  padding: const EdgeInsets.only(left: 18, right: 18, top: 10, bottom: 10),
                   child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -159,7 +161,7 @@ class BlockNotificationsState extends State<BlockNotifications> {
                   return Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(left: 24, right: 24, bottom: 25),
+                        padding: const EdgeInsets.only(left: 18, right: 18, bottom: 25),
                         child: Container(
                           width: double.infinity,
                           height: 52,
@@ -177,7 +179,7 @@ class BlockNotificationsState extends State<BlockNotifications> {
                               Expanded(child: Text(app.appName, style: const TextStyle(color: Colors.white))),
                               StatefulBuilder(
                                 builder: (context, setState) {
-                                  bool selected = whitelistNotifications.contains(app.packageName);
+                                  bool selected = allowedNotifications.contains(app.packageName);
                                   return Checkbox(
                                     value: selected,
                                     side: BorderSide(width: 1, color: Colors.grey),
@@ -192,7 +194,7 @@ class BlockNotificationsState extends State<BlockNotifications> {
                                       }
                                       else{
                                         if(changedValue!){
-                                          if(whitelistNotifications.length < FreeLimits.whitelistNotificationsLimit || subscriptionManager.isProUser){
+                                          if(allowedNotifications.length < FreeLimits.whitelistNotificationsLimit || subscriptionManager.isProUser){
                                             handleWhitelistNotifications(app);
                                             setState((){});
                                           }

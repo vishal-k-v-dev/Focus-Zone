@@ -18,6 +18,13 @@ fun saveInt(context: Context, key: String, value: Int) {
     editor.commit()
 }
 
+fun saveBoolean(context: Context, key: String, value: Boolean) {
+    val sharedPreferences: SharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_MULTI_PROCESS)
+    val editor: SharedPreferences.Editor = sharedPreferences.edit()
+    editor.putBoolean(key, value)
+    editor.commit()
+}
+
 fun saveStringList(context: Context, key: String, list: List<String>) {
     val sharedPreferences: SharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_MULTI_PROCESS)
     val editor: SharedPreferences.Editor = sharedPreferences.edit()
@@ -46,9 +53,19 @@ fun getInt(context: Context, key: String): Int {
     return sharedPreferences.getInt(key, 0)
 }
 
+fun getBoolean(context: Context, key: String): Boolean {
+    val sharedPreferences: SharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_MULTI_PROCESS)
+    val editor: SharedPreferences.Editor = sharedPreferences.edit()
+    return sharedPreferences.getBoolean(key, false)
+}
+
+
 fun getStringList(context: Context, key: String): List<String> {
     val sharedPreferences: SharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_MULTI_PROCESS)
     val editor: SharedPreferences.Editor = sharedPreferences.edit()
+    if(sharedPreferences.getString(key, "") == ""){
+        return emptyList()
+    }
     return sharedPreferences.getString(key, "")?.split("**") ?: emptyList()
 }
 

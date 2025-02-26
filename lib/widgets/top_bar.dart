@@ -2,7 +2,6 @@ import 'package:focus/main.dart';
 import '../paywall/paywall.dart';
 import 'package:flutter/material.dart';
 import '../paywall/subscription_manager.dart';
-import 'package:shimmer/shimmer.dart';
 
 class TopBar extends StatefulWidget {
   const TopBar({super.key});

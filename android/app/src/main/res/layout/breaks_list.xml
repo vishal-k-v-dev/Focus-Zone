@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingStart="22dp"
+    android:paddingEnd="22dp"
+    android:background="#FF101010">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/breaks_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="start">
+
+            <View 
+                android:layout_width="match_parent"
+                android:layout_height="66dp"
+            />
+        
+            <TextView
+                android:id="@+id/breaks_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 breaks left" 
+                android:textSize="20sp"
+                android:textColor="#FFFFFF"
+                android:layout_gravity="center"
+                android:textStyle="bold" />
+
+            <View 
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+            />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>

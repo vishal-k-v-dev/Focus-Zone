@@ -76,7 +76,6 @@ class _DurationInputWidgetState extends State<DurationInputWidget> {
                           ]
                         )
                       ),
-                      //const Text("minutes")
                     ],
                   )
                 )
@@ -192,7 +191,7 @@ class _DurationInputWidgetState extends State<DurationInputWidget> {
           segmentDividerWidth: ((MediaQuery.of(context).size.width - 40) / 1.15)/44,
           segmentDividerColor: Color.fromARGB(255, 16, 16, 16),
           backgroundColor: Color.fromARGB(255, 100, 100, 100),
-          foregroundColor: Colors.greenAccent,
+          foregroundColor: Colors.white70,
           min: 0.0,
           max: 24.0,
           initialProgress: 0.0,

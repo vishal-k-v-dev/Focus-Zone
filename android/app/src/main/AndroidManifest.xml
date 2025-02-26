@@ -31,10 +31,27 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
             />
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
+        </activity>
+
+        <activity
+            android:name=".BackgroundScreen"
+            android:launchMode="singleTask"
+            android:resizeableActivity="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/InitialTheme">
+        </activity>
+
+        <activity
+            android:name=".WebViewScreen"
+            android:launchMode="singleTask"
+            android:resizeableActivity="false"
+            android:theme="@style/InitialTheme">
         </activity>
         
         <meta-data
@@ -45,16 +62,18 @@
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-7284288989154980~7386230804"/>
                     
-        <service 
+        <!-- <service 
             android:name=".AppForegroundService"
             android:exported="true"
             android:foregroundServiceType="specialUse"
             android:process=":ServiceProcess" />
+
         <service 
             android:name=".FloatingOverlayService"
             android:exported="true"
             android:foregroundServiceType="specialUse"
-            android:process=":ServiceProcess" />
+            android:process=":ServiceProcess" /> -->
+
         <service
             android:name=".NotificationBlockerService"
             android:exported="true"

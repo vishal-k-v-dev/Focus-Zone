@@ -96,21 +96,22 @@ class _WarningScreenState extends State<WarningScreen> {
   }
 
   startFocusSession() async{
-
     platform.invokeMethod(
       'start',
       {
-        "list": whitelistAppNames,
-        'packagelist': whitelistApps,
-        'milliseconds': (hourValue * 60 * 60 * 1000) + (minuteValue * 60000),
-        'exitbutton': removeExitButton ? 0 : 1,
-        'is_block_notification_enabled': 1,
-        'block_notifications': whitelistNotifications,
-        'break_duration': breakDuration * 20000,
-        'break_session': breakSession,
-        'auto_start': autoStart ? 1 : 0,
-        'blacklist_apps': blacklistApps,
-        "usage_limits": usageTimeLimits.map((x) => x == 0 ? 4320000 : x).toList()
+        'duration': (hourValue * 60 * 60 * 1000) + (minuteValue * 60000),
+        "whitelisted_names": allowedAppNames,
+        "whitelisted_packages": allowedApps,
+        "blacklisted_packages": blacklistedApps,
+        "break_sessions": breakSession,
+        "maximum_break_duration": breakDuration,
+        'exit_button': removeExitButton ? 0 : 1,
+        'should_block_notifications': blockNotifications,
+        'whitelisted_notifications': allowedNotifications,
+        "usage_limits": durationLimits.map((x) => x == 0 ? 43200000 * 2 : x).toList(),
+        "youtube_videos_id": youtubeVideosID,
+        "youtube_videos_title": youtubeVideosTitle,
+        "youtube_videos_thumbnail_link": youtubeVideosThumbnailLink
       },
     );
     Navigator.pop(context);

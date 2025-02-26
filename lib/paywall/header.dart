@@ -12,8 +12,8 @@ class TopBanner extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             text: const TextSpan(
-              text: "Focus Zone ",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
+              text: "Get ",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
               children: [
                 TextSpan(
                   text: "Pro",

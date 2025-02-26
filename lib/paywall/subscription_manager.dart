@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:focus/subscription.dart';
 import '../main.dart';
+import 'header.dart';
 
 class SubscriptionManagementPage extends StatefulWidget {
   const SubscriptionManagementPage({super.key});
@@ -22,61 +23,67 @@ class _SubscriptionManagementPageState extends State<SubscriptionManagementPage>
         !subscriptionManager.error ? 
         Scaffold(
           backgroundColor: const Color.fromARGB(255, 16, 16, 16),
-          bottomNavigationBar: Padding(
-            padding: const EdgeInsets.only(left: 22, right: 22),
+          body: Padding(
+            padding: const EdgeInsets.only(left: 18, right: 18, top: 10, bottom: 5),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: RichText(
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        text: const TextSpan(
+                          text: "Focus Zone ",
+                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+                          children: [
+                            TextSpan(
+                              text: "Pro",
+                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.greenAccent),
+                            )
+                          ]
+                        )
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+                      },
+                      child: const Icon(Icons.close)
+                    )
+                  ],
+                ),
+
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text("You have subscribed to Focus Zone Pro, the subscription auto renews until cancelled, click on Manage Subscription button to cancel subscription", style: TextStyle(fontWeight: FontWeight.w700, color: Colors.grey), textAlign: TextAlign.center,),
+                ),
+
                 ElevatedButton(
-                  child: const Text("Manage Subscription"),
                   onPressed: (){
                     subscriptionManager.openPlayStoreSubscriptions();
-                  },
-                ),
-                TextButton(
-                  child: Text("Go back"),
-                  onPressed: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()));
-                  },
-                )
-              ],
-            )
-          ),
-          body: Padding(
-            padding: const EdgeInsets.only(left: 22, right: 22, top: 10, bottom: 5),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("Your current subscription plan :", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      const Icon(Icons.circle, size: 5),
-                      const SizedBox(width: 7.5),
-                      Expanded(
-                        child: subscriptionManager.activeSubscriptionType == SubscriptionType.monthly ?
-                        Text("${subscriptionManager.monthlySubscriptionLocalizedPrice} / month", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)) :
-                        Text("${subscriptionManager.yearlySubscriptionLocalizedPrice} / year", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  
-                      )
-                    ],
+                  }, 
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.greenAccent,
+                    foregroundColor: Colors.black
                   ),
-                  const SizedBox(height: 10),
-                  const Row(
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.circle, size: 5),
-                      SizedBox(width: 7.5),
-                      Expanded(
-                        child: Text("Auto renews until canceled.", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))
+                      Text(
+                        "Manage Subscription", style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ],
-                  )
-                ],
-              ),
+                  ),
+                )
+              ]
             ),
           )
-        ) :
+        ) 
+        :
         const Scaffold(
           backgroundColor: Color.fromARGB(255, 16, 16, 16),
           body: Column(

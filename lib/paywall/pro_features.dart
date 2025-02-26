@@ -26,7 +26,7 @@ class ProFeatures extends StatelessWidget {
           SizedBox(height: 10),
           Feature(
             feature: "No advertisements",
-            freeLimit: "The Free version contains ads and requires you to watch an ad before starting the focus session",
+            freeLimit: "The Free version requires you to watch an ad before starting the focus session",
           ),
           SizedBox(height: 25),
           Feature(
@@ -40,6 +40,11 @@ class ProFeatures extends StatelessWidget {
           ),
           SizedBox(height: 25),
           Feature(
+            feature: "Unlimited youtube videos",
+            freeLimit: "You can add up only 1 youtube video in the Free version, videos where the youtuber disabled embed option can't be viewed",
+          ),
+          SizedBox(height: 25),
+          Feature(
             feature: "Up to 25 break sessions",
             freeLimit: "You can have only one break session in the Free version",
           ),
@@ -47,6 +52,11 @@ class ProFeatures extends StatelessWidget {
           Feature(
             feature: "Up to 60 minutes of break duration",
             freeLimit: "You can have a break duration of up to 5 minutes in the Free version",
+          ),
+          SizedBox(height: 25),
+          Feature(
+            feature: "Blacklist unlimited apps",
+            freeLimit: "You can block up to 3 apps in the Free version, blacklisted apps can't be accessed during breaks",
           ),
         ],
       ),
@@ -66,7 +76,7 @@ class Feature extends StatelessWidget {
       children: [
         Text(feature, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, letterSpacing: .45)),
         const SizedBox(height: 7),
-        Text(freeLimit, style: const TextStyle(fontSize: 14, color: Colors.grey))
+        Text(freeLimit, style: const TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.bold, height: 1.33))
       ],
     );
   }

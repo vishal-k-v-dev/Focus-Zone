@@ -23,31 +23,51 @@ fun isForegroundServiceRunning(context: Context): Boolean {
 }
 
 class NotificationBlockerService : NotificationListenerService() {
-
-    private var blockedPackages: List<String> = emptyList() 
+    private var isFocusSessionActive: Boolean = false
+    private var shouldBlockNotifications: Boolean = false
+    private var whitelistedApps: List<String> = emptyList() 
 
     override fun onCreate() {
         super.onCreate()
-        val filter = IntentFilter("com.example.BLOCK_NOTIFICATIONS")
-        registerReceiver(blockReceiver, filter, RECEIVER_EXPORTED)
+        val filterBroadcasts = IntentFilter()
+        filterBroadcasts.addAction("com.lock.focus.START_SESSION")
+        filterBroadcasts.addAction("com.lock.focus.END_SESSION")
+        filterBroadcasts.addAction("com.lock.focus.SESSION_FINISHED")
+        registerReceiver(broadcastReceiver, filterBroadcasts, RECEIVER_EXPORTED)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        unregisterReceiver(blockReceiver)
+        unregisterReceiver(broadcastReceiver)
     }
 
-    private val blockReceiver = object : BroadcastReceiver() {
+    private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            //val packages = intent.getStringArrayListExtra("packages") as? List<String> ?: emptyList()
-            blockedPackages = getStringList(context, "whitelist_notifications")
+            when(intent.action){
+                "com.lock.focus.START_SESSION" -> {
+                    isFocusSessionActive = true
+                    shouldBlockNotifications = getBoolean(context, "should_block_notifications")
+                    whitelistedApps = getStringList(context, "whitelisted_notifications")
+                }
+                "com.lock.focus.END_SESSION" -> {
+                    isFocusSessionActive = false
+                    shouldBlockNotifications = false
+                    whitelistedApps = emptyList()
+                }
+                "com.lock.focus.SESSION_FINISHED" -> {
+                    isFocusSessionActive = false
+                    shouldBlockNotifications = false
+                    whitelistedApps = emptyList()
+                }
+            }
+            
         }
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         sbn?.let {
-            if(isForegroundServiceRunning(this)){
-                if ((!blockedPackages!!.contains(it.packageName))) {
+            if(isFocusSessionActive){
+                if (whitelistedApps.contains(it.packageName) == false) {
                     cancelNotification(it.key)
                 }
             }

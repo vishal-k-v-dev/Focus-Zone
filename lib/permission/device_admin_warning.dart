@@ -18,7 +18,7 @@ class _DeviceAdminWarningState extends State<DeviceAdminWarning> {
       backgroundColor: const Color.fromARGB(255, 20, 20, 20),
       builder: (context){
         return Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.only(top: 12, bottom: 12, left: 18, right: 18),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -28,9 +28,7 @@ class _DeviceAdminWarningState extends State<DeviceAdminWarning> {
               const SizedBox(height: 5),
               const Divider(color: Colors.grey),
               const SizedBox(height: 3.5),
-              const Text("Device Admin Permission is used to prevent uninstallation during focus Session.", style: TextStyle(fontSize: 14, height: 1.5)),
-              const SizedBox(height: 14),
-              const Text("The app can be uninstalled when focus session is not active by disabling 'prevent uninstall' or by disabling device admin permission manually", style: TextStyle(fontSize: 14, height: 1.5)),
+              const Text("Device Admin Permission is used to prevent uninstallation during focus Session.\n\nThe app can be uninstalled when focus session is not active by disabling 'prevent uninstall' or by disabling device admin permission manually", style: TextStyle(fontSize: 14, height: 1.5)),
               const SizedBox(height: 14),
               const Divider(color: Colors.grey),
               const SizedBox(height: 5),
@@ -48,7 +46,7 @@ class _DeviceAdminWarningState extends State<DeviceAdminWarning> {
                       Navigator.pop(context);
                       await platform.invokeMethod("GetDeviceAdminPermission");
                     }, 
-                    child: const Text("Agree & Grant Permission", style: TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold))
+                    child: const Text("Grant Permission", style: TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold))
                   ),
                 ],
               )
