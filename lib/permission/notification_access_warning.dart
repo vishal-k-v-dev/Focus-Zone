@@ -1,4 +1,3 @@
-import 'package:focus/main.dart';
 import 'package:flutter/material.dart';
 import 'package:notification_listener_service/notification_listener_service.dart';
 

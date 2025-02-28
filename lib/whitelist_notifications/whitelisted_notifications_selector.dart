@@ -1,4 +1,3 @@
-import '../ads.dart';
 import '../main.dart';
 import '../widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -6,106 +5,17 @@ import '../free_limits.dart';
 import '../paywall/paywall_reminder.dart';
 import '../preferences.dart';
 
-
-class WhitelistedNotificationList extends StatefulWidget {
-  const WhitelistedNotificationList({super.key});
-
-  @override
-  State<WhitelistedNotificationList> createState() => _WhitelistedNotificationListState();
-}
-
-class _WhitelistedNotificationListState extends State<WhitelistedNotificationList> {
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: const Color.fromARGB(255, 16, 16, 16),
-        floatingActionButton: FloatingActionButton.small(
-          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => BlockNotifications(onPop: () => setState((){})))), //onStartPress, 
-          backgroundColor: Colors.greenAccent,
-          child: const Icon(Icons.edit)
-        ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children:
-              [
-                Row(
-                  children: [
-                    const Expanded(
-                      child: Text(
-                        "Whitelisted Notifications",
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: .6),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: (){Navigator.pop(context);},
-                      child: const Icon(Icons.close)
-                    )
-                  ],
-                ),
-                const SizedBox(height: 25),
-              ] 
-              +
-              List.generate(
-                allowedNotifications.length, 
-                (index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 20),
-                    child: Container(
-                      width: double.infinity,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey, width: .7),
-                        borderRadius: BorderRadius.circular(10)
-                      ),
-                      padding: const EdgeInsets.only(
-                        left: 10, right: 4, top: 14, bottom: 14
-                      ),
-                      child: Row(
-                        children: [
-                          AppIcon(packageName: allowedNotifications[index]),
-                          const SizedBox(width: 12.5),
-                          Expanded(
-                            child: Text(
-                              appsList!.firstWhere((element) => element.packageName == allowedNotifications[index]).appName,
-                              style: const TextStyle(color: Colors.white)
-                            )
-                          ),
-                          const SizedBox(width: 5)
-                        ],
-                      )
-                    ),
-                  );
-                }
-              )
-              +
-              [
-                SizedBox(height: MediaQuery.of(context).size.height/100*25)
-              ]
-            ),
-          ),
-        )
-      ),
-    );
-  }
-}
-
-
-
-class BlockNotifications extends StatefulWidget {
+class WhitelistNotificationsSelector extends StatefulWidget {
 
   final Function onPop;
 
-  const BlockNotifications({super.key, required this.onPop});
+  const WhitelistNotificationsSelector({super.key, required this.onPop});
 
   @override
-  BlockNotificationsState createState() => BlockNotificationsState();
+  WhitelistNotificationsSelectorState createState() => WhitelistNotificationsSelectorState();
 }
 
-class BlockNotificationsState extends State<BlockNotifications> {
+class WhitelistNotificationsSelectorState extends State<WhitelistNotificationsSelector> {
 
   handleWhitelistNotifications(app){
     if (allowedNotifications.contains(app.packageName)) {

@@ -1,11 +1,9 @@
-import 'package:focus/free_limits.dart';
 import 'package:focus/paywall/paywall.dart';
 import 'package:focus/preferences.dart';
 import 'package:focus/widgets/widgets.dart';
 import '../main.dart';
-import '../paywall/paywall_reminder.dart';
 import 'package:flutter/material.dart';
-import '../app_selectors/blacklist_app_selector.dart';
+import '../blacklist_apps/blacklisted_apps_list.dart';
 
 class BreakSettingsPage extends StatefulWidget {
   const BreakSettingsPage({super.key});
@@ -239,29 +237,6 @@ class _BreakSettingsPageState extends State<BreakSettingsPage> {
                     }
                   )
                 ]
-    );
-  }
-
-  Widget buildIncrementDecrementRow(int currentValue, int maxValue, ValueChanged<int> onValueChanged) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        GestureDetector(
-          child: const Padding(
-            padding: EdgeInsets.all(8),
-            child: Icon(Icons.add_circle),
-          ),
-          onTap: () => onValueChanged(currentValue < maxValue ? currentValue + 1 : currentValue),
-        ),
-        Text("$currentValue", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        GestureDetector(
-          child: const Padding(
-            padding: EdgeInsets.only(left: 8.0, top: 8.0, bottom: 8.0),
-            child: Icon(Icons.remove_circle),
-          ),
-          onTap: () => onValueChanged(currentValue > 0 ? currentValue - 1 : currentValue),
-        ),
-      ],
     );
   }
 }

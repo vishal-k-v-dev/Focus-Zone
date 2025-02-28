@@ -1,6 +1,5 @@
 // ignore_for_file: avoid_unnecessary_containers, prefer_const_constructors, prefer_const_literals_to_create_immutables
 
-import 'package:notification_listener_service/notification_listener_service.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:usage_stats/usage_stats.dart';

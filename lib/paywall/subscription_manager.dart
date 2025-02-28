@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:focus/subscription.dart';
 import '../main.dart';
-import 'header.dart';
+import 'top_bar.dart';
 
 class SubscriptionManagementPage extends StatefulWidget {
   const SubscriptionManagementPage({super.key});

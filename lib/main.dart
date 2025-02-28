@@ -1,8 +1,7 @@
 // ignore_for_file: usebuild_context_synchronously, use_build_context_synchronously
 
-import 'package:focus/widgets/top_bar.dart';
-import 'pages/pages.dart';
-import 'active_screen/active.dart';
+import 'package:focus/widgets/app_bar.dart';
+import 'pages/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -130,6 +129,10 @@ Future<void> getSettings() async{
   blockNotifications = preferenceManager.getBool(key: "block_notifications", defaultValue: false) && notificationAccess;
 
   autoStart = (preferenceManager.getBool(key: "auto_start", defaultValue: false)) && accessibility;
+
+  if(!subscriptionManager.isProUser){
+    durationLimits = List.generate(allowedApps.length, (index) => 0);
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -207,10 +210,6 @@ class _HomeScreenState extends State<HomeScreen> {
       appsList?.removeWhere((app) => [homeScreenPackage].contains(app.packageName));
     }
 
-    if (await platform.invokeMethod("isActive")) {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => const ActiveScreen()));
-    }
-
     setState(() {});
   }
 
@@ -253,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 7.5),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 0),
-              child: TopBar()
+              child: CustomAppBar()
             ),
             const SizedBox(height: 5),
             Expanded(

@@ -1,14 +1,11 @@
 // ignore_for_file: use_build_context_synchronously
 import 'dart:async';
-import 'package:focus/pages/break_settings.dart';
-import 'package:focus/pages/pages.dart';
-import 'strictness_page.dart';
+import 'break_settings.dart';
 import '../main.dart';
 import '../widgets/widgets.dart';
 import 'package:flutter/material.dart';
-import '../app_selectors/notification_app_selector.dart';
-import '../app_selectors/whitelist_app_selector.dart';
-import 'package:ogp_data_extract/ogp_data_extract.dart';
+import '../whitelist_notifications/whitelisted_notifications_list.dart';
+import '../whitelist_apps/whitelisted_apps_list.dart';
 import '../youtube_videos/yt_videos.dart';
 import '../preferences.dart';
 import '../permission/device_admin_warning.dart';
@@ -135,7 +132,7 @@ class _SettingsPageState extends State<SettingsPage> {
           title: "Whitelist Notifications",
           subtitle: "${allowedNotifications.length} ${allowedNotifications.length == 1 ? "app" : "apps"}",
           disabled: !blockNotifications,
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const WhitelistedNotificationList()))
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const WhitelistedNotificationsList()))
         ),
 
         const  SizedBox(height: 25),

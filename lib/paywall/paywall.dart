@@ -1,4 +1,3 @@
-import 'header.dart';
 import '../main.dart';
 import 'pricing.dart';
 import 'pro_features.dart';
@@ -25,7 +24,7 @@ class _PayWallState extends State<PayWall> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                TopBanner(),
+                TopBar(),
                 SizedBox(height: 20),
                 PricingPlans(),
                 SizedBox(height: 20),
@@ -43,6 +42,40 @@ class _PayWallState extends State<PayWall> {
           children: [Center(child: Text("something went wrong..."))]
         )
       )
+    );
+  }
+}
+
+class TopBar extends StatelessWidget {
+  const TopBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: RichText(
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            text: const TextSpan(
+              text: "Get ",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+              children: [
+                TextSpan(
+                  text: "Pro",
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.greenAccent),
+                )
+              ]
+            )
+          ),
+        ),
+        GestureDetector(
+          onTap: (){
+            Navigator.pop(context);
+          },
+          child: const Icon(Icons.close)
+        )
+      ],
     );
   }
 }

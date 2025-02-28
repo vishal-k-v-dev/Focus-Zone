@@ -35,13 +35,18 @@ class ProFeatures extends StatelessWidget {
           ),
           SizedBox(height: 25),
           Feature(
+            feature: "Set duration limits",
+            freeLimit: "You can make sure you don't over-use whitelisted apps by setting duration limits",
+          ),
+          SizedBox(height: 25),
+          Feature(
             feature: "Whitelist unlimited Notifications",
             freeLimit: "You can whitelist up to 3 apps' notifications in the Free version",
           ),
           SizedBox(height: 25),
           Feature(
             feature: "Unlimited youtube videos",
-            freeLimit: "You can add up only 1 youtube video in the Free version, videos where the youtuber disabled embed option can't be viewed",
+            freeLimit: "You can add only 1 youtube video in the Free version, videos where the youtuber disabled embed option can't be viewed",
           ),
           SizedBox(height: 25),
           Feature(

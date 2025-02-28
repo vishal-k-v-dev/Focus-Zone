@@ -1,6 +1,4 @@
-import 'ads.dart';
 import 'main.dart';
-import 'active_screen/active.dart';
 import 'package:flutter/material.dart';
 import 'package:action_slider/action_slider.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -33,7 +31,7 @@ class _WarningScreenState extends State<WarningScreen> {
     }
     else{
       await RewardedAd.load(
-        adUnitId: AdUnits.rewardedAdUnit,     
+        adUnitId: "ca-app-pub-7284288989154980/7641381017",     
         request: const AdRequest(),
         rewardedAdLoadCallback: RewardedAdLoadCallback(
           onAdLoaded: (RewardedAd ad) async{
@@ -115,6 +113,5 @@ class _WarningScreenState extends State<WarningScreen> {
       },
     );
     Navigator.pop(context);
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const ActiveScreen()));
   }
 }

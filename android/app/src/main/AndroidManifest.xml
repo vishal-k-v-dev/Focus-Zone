@@ -61,18 +61,6 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-7284288989154980~7386230804"/>
-                    
-        <!-- <service 
-            android:name=".AppForegroundService"
-            android:exported="true"
-            android:foregroundServiceType="specialUse"
-            android:process=":ServiceProcess" />
-
-        <service 
-            android:name=".FloatingOverlayService"
-            android:exported="true"
-            android:foregroundServiceType="specialUse"
-            android:process=":ServiceProcess" /> -->
 
         <service
             android:name=".NotificationBlockerService"

@@ -3,14 +3,14 @@ import '../paywall/paywall.dart';
 import 'package:flutter/material.dart';
 import '../paywall/subscription_manager.dart';
 
-class TopBar extends StatefulWidget {
-  const TopBar({super.key});
+class CustomAppBar extends StatefulWidget {
+  const CustomAppBar({super.key});
 
   @override
-  State<TopBar> createState() => _TopBarState();
+  State<CustomAppBar> createState() => _CustomAppBarState();
 }
 
-class _TopBarState extends State<TopBar> {
+class _CustomAppBarState extends State<CustomAppBar> {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -22,11 +22,6 @@ class _TopBarState extends State<TopBar> {
             const Text("Zone", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900)),
             const Spacer(),
             GestureDetector(
-              //child: Shimmer.fromColors(
-              //  baseColor: Colors.green, 
-              //  highlightColor: const Color.fromARGB(255, 91, 255, 105),
-              //  child: const Icon(Icons.diamond_outlined, size: 24, color: Colors.green),
-              //),
               child: const Icon(Icons.diamond_outlined, size: 24, color: Colors.greenAccent),
               onTap: (){
                 if(!subscriptionManager.isProUser){
