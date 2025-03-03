@@ -207,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appsList?.sort((a, b) => a.appName.compareTo(b.appName));
 
       String homeScreenPackage = await platform.invokeMethod('getHomePackage');
-      appsList?.removeWhere((app) => [homeScreenPackage].contains(app.packageName));
+      appsList?.removeWhere((app) => [homeScreenPackage, "com.lock.focus"].contains(app.packageName));
     }
 
     setState(() {});
