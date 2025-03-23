@@ -62,7 +62,7 @@ class _AccessibilityWarningState extends State<AccessibilityWarning> {
                       Row(
                         children: [
                           Text("-  ", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, height: 1.35, color: Colors.grey)),
-                          Expanded(child: Text("To auto start focus session immediately after reboot / powerr off and on.", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, height: 1.35, color: Colors.grey))),
+                          Expanded(child: Text("To auto start focus session immediately after device restart.", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, height: 1.35, color: Colors.grey))),
                         ],
                       ),
                       SizedBox(height: 15),
@@ -77,9 +77,9 @@ class _AccessibilityWarningState extends State<AccessibilityWarning> {
                 ),
               ),
 
-              const SizedBox(height: 7.5),
-              const Text("Accessibility service is not used to collect or share any personal data.", style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, height: 1.35, color: Color.fromARGB(216, 255, 255, 255)), textAlign: TextAlign.center),
-              const SizedBox(height: 7.5),
+              // const SizedBox(height: 7.5),
+              // const Text("Accessibility service is not used to collect or share any personal data.", style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, height: 1.35, color: Color.fromARGB(216, 255, 255, 255)), textAlign: TextAlign.center),
+              // const SizedBox(height: 7.5),
 
               Row(
                 children: [
@@ -98,13 +98,22 @@ class _AccessibilityWarningState extends State<AccessibilityWarning> {
                         mainAxisAlignment: MainAxisAlignment.center, 
                         children: [
                           SizedBox(height: 42.5), 
-                          Text("Grant Permission", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 17, color: Colors.black))
+                          Text("Agree & Grant Permission", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 17, color: Colors.black))
                         ]
                       )
                     ),
                   ),
                 ],
               ),
+
+              Center(
+                child: TextButton(
+                  child: const Text("cancel", style: TextStyle(color: Colors.greenAccent)),
+                  onPressed: (){
+                    Navigator.pop(context);
+                  }
+                ),
+              )
             ],
           ),
         )

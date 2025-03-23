@@ -18,6 +18,7 @@ import '../paywall/subscription_manager.dart';
 import 'preferences.dart';
 import 'package:widget_size/widget_size.dart';
 import 'permission/accessibility_warning.dart';
+import 'widgets/agreement_text.dart';
 
 MethodChannel platform = const MethodChannel("com.lock.focus");
 
@@ -286,7 +287,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                       const SizedBox(height: 30),
-                      const SettingsPage()
+                      const SettingsPage(),
+                      TermsAndPrivacyText()
                     ],
                   ),
                 ),
