@@ -1,4 +1,4 @@
-package com.lock.focus
+/*package com.lock.focus
 
 import java.lang.*
 import android.os.Handler
@@ -59,4 +59,4 @@ abstract class Loop {
     abstract fun onLoop(remainingDuration: Long)
 
     abstract fun onFinish()
-}
+}*/
