@@ -124,7 +124,7 @@ class _AllowYTVideosState extends State<AllowYTVideos> {
               }
             },
             backgroundColor: Colors.greenAccent,
-            child: const Icon(Icons.add),
+            child: const Icon(Icons.add, color: Colors.black),
           ),
         ),
       ),
