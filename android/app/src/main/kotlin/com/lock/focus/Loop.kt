@@ -18,26 +18,23 @@ abstract class Loop {
         }
 
         handler.postDelayed({
-            val now = SystemClock.elapsedRealtime()
-            val drift = (now - startTime) - (intervalUsedSoFar())
+            // Calculate the actual elapsed time since start
+            val elapsedTime = SystemClock.elapsedRealtime() - startTime
 
-            if (drift > 10_000L) {
-                // Correct the remaining duration to match actual time passed
-                val actualPassed = now - startTime
-                remainingDuration = ((remainingDuration + intervalUsedSoFar()) - actualPassed).coerceAtLeast(0L)
-                // Round it to nearest lower 500ms
-                remainingDuration -= remainingDuration % 500
-            } else {
+            // Correct remaining duration by elapsed time
+            remainingDuration = (remainingDuration - elapsedTime).coerceAtLeast(0L)
+
+            // If elapsed time is less than 500ms (or any small number), just subtract interval normally
+            if (elapsedTime < 500) {
                 remainingDuration -= interval
             }
 
+            // Call loop callback
             onLoop(remainingDuration)
+
+            // Recursively call scheduleLoop for next iteration
             scheduleLoop(interval)
         }, interval)
-    }
-
-    private fun intervalUsedSoFar(): Long {
-        return (SystemClock.elapsedRealtime() - startTime).coerceAtLeast(0L)
     }
 
     fun start(duration: Long, interval: Long) {
