@@ -22,7 +22,7 @@ class _WhiteListedAppsListState extends State<WhiteListedAppsList> {
         floatingActionButton: FloatingActionButton.small(
           onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => WhitelistAppsSelector(onPop: () => setState((){})))),
           backgroundColor: Colors.greenAccent,
-          child: const Icon(Icons.edit)
+          child: const Icon(Icons.edit, color: Colors.black)
         ),
 
         body: Padding(
