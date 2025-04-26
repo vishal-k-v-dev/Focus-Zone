@@ -67,7 +67,7 @@ class _WarningScreenState extends State<WarningScreen> {
             !isRewarded ? const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(height: 17, width: 17, child: CircularProgressIndicator()),
+                SizedBox(height: 17, width: 17, child: CircularProgressIndicator(color: Colors.greenAccent)),
                 Text(
                   "   Focus session will start after ad",
                   style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
