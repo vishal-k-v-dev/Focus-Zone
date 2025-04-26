@@ -8,44 +8,44 @@ abstract class Loop {
     private var remainingDuration: Long = 0
     private var running: Boolean = false
     private var startTime: Long = 0
-    private var interval: Long = 0
+    private var initialDuration: Long = 0
     private val handler = Handler(Looper.getMainLooper())
 
-    private fun scheduleLoop() {
-        if (!running || remainingDuration <= 0) {
+    private fun scheduleLoop(interval: Long) {
+        if (remainingDuration <= 0 || !running) {
             onFinish()
             running = false
             return
         }
 
-        handler.postDelayed({
-            val elapsed = SystemClock.elapsedRealtime() - startTime
-            
+        handler.postDelayed(
+            {
+                val elapsed = SystemClock.elapsedRealtime() - startTime
+                val expectedRemaining = initialDuration - elapsed
+                val drift = remainingDuration - expectedRemaining
 
-            // Correction: if elapsed time is far ahead of expected time
-            val expectedRemaining = remainingDuration
-            val actualRemaining = startTime + expectedRemaining - SystemClock.elapsedRealtime()
-            val drift = expectedRemaining - actualRemaining
+                if (drift > 10_000) {
+                    // Major time jump, likely due to doze or device sleep
+                    remainingDuration = expectedRemaining
+                } else {
+                    // Normal tick
+                    remainingDuration -= interval
+                }
 
-            if (drift > 1000) { // if there's over 1s drift (due to doze or sleep)
-                remainingDuration = actualRemaining
-            }
-else{
-remainingDuration -= interval
-}
-
-            onLoop(remainingDuration)
-            scheduleLoop()
-        }, interval)
+                onLoop(remainingDuration)
+                scheduleLoop(interval)
+            },
+            interval
+        )
     }
 
     fun start(duration: Long, interval: Long) {
         if (running) return
-        this.remainingDuration = duration
-        this.interval = interval
-        this.startTime = SystemClock.elapsedRealtime()
-        this.running = true
-        scheduleLoop()
+        remainingDuration = duration
+        initialDuration = duration
+        startTime = SystemClock.elapsedRealtime()
+        running = true
+        scheduleLoop(interval)
     }
 
     fun finish() {
@@ -72,9 +72,9 @@ remainingDuration -= interval
     }
 
     abstract fun onLoop(remainingDuration: Long)
+
     abstract fun onFinish()
 }
-
 
 /*package com.lock.focus
 
