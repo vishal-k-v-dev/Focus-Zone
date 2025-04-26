@@ -136,6 +136,7 @@ Future<void> getSettings() async{
   }
 }
 
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -145,7 +146,7 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0), 
-          child: child!
+          child: child!,
         );
       },
 
@@ -153,7 +154,23 @@ class MyApp extends StatelessWidget {
         displayOverOtherApps && usageStats
       ) ? '/' : '/permissions',
 
-      theme: ThemeData(brightness: Brightness.dark, primarySwatch: Colors.green),
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        primarySwatch: Colors.green,
+
+        // --- ADD THESE LINES HERE ---
+        dialogTheme: const DialogTheme(
+          backgroundColor: Color.fromARGB(255, 30, 30, 30),
+          surfaceTintColor: Colors.transparent,
+        ),
+        bottomSheetTheme: const BottomSheetThemeData(
+          backgroundColor: Color.fromARGB(255, 30, 30, 30),
+          surfaceTintColor: Colors.transparent,
+        ),
+        // -----------------------------
+
+        useMaterial3: true, // Also important if you're on Flutter 3.19+
+      ),
 
       routes: {
         '/': (context) => const HomeScreen(),
@@ -164,6 +181,7 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
