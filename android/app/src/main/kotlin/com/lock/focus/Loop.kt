@@ -3,72 +3,73 @@ package com.lock.focus
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
-import java.lang.*
 
-class Loop {
-    private var interval: Long = 0L
-    private var initialDuration: Long = 0L
-    private var remainingDuration: Long = 0L
-    private var startTime: Long = 0L
-    private var running = false
+abstract class Loop {
+    private var remainingDuration: Long = 0
+    private var running: Boolean = false
+    private var startTime: Long = 0
     private val handler = Handler(Looper.getMainLooper())
-    private val loopRunnable = object : Runnable {
-        override fun run() { scheduleLoop() }
+
+    private fun scheduleLoop(interval: Long) {
+        if (remainingDuration <= 0 || !running) {
+            onFinish()
+            running = false
+            return
+        }
+
+        handler.postDelayed({
+            val now = SystemClock.elapsedRealtime()
+            val drift = (now - startTime) - (intervalUsedSoFar())
+
+            if (drift > 10_000L) {
+                // Correct the remaining duration to match actual time passed
+                val actualPassed = now - startTime
+                remainingDuration = ((remainingDuration + intervalUsedSoFar()) - actualPassed).coerceAtLeast(0L)
+                // Round it to nearest lower 500ms
+                remainingDuration -= remainingDuration % 500
+            } else {
+                remainingDuration -= interval
+            }
+
+            onLoop(remainingDuration)
+            scheduleLoop(interval)
+        }, interval)
+    }
+
+    private fun intervalUsedSoFar(): Long {
+        return (SystemClock.elapsedRealtime() - startTime).coerceAtLeast(0L)
     }
 
     fun start(duration: Long, interval: Long) {
         if (running) return
-        this.interval = interval
-        initialDuration = duration
         remainingDuration = duration
         startTime = SystemClock.elapsedRealtime()
         running = true
-        handler.postDelayed(loopRunnable, interval)
-    }
-
-    fun stop() {
-        running = false
-        handler.removeCallbacks(loopRunnable)
+        scheduleLoop(interval)
     }
 
     fun finish() {
-        if (!running) return
-        running = false
-        handler.removeCallbacks(loopRunnable)
-        onFinish()
-    }
-
-    fun isRunning() = running
-    fun getRemainingDuration() = remainingDuration
-
-    private fun scheduleLoop() {
-        if (!running) return
-        if (remainingDuration <= 0L) {
+        if (running) {
             running = false
+            handler.removeCallbacksAndMessages(null)
             onFinish()
-            return
         }
-        val now = SystemClock.elapsedRealtime()
-        val elapsed = now - startTime
-        val expectedRemaining = initialDuration - elapsed
-        val drift = remainingDuration - expectedRemaining
-        if (drift > 10_000L) {
-            remainingDuration = expectedRemaining
-        } else {
-            remainingDuration -= interval
-        }
-        onLoop(remainingDuration)
-        handler.postDelayed(loopRunnable, interval)
     }
 
-    /** Called each tick with the updated remaining time. */
-    open fun onLoop(remaining: Long) {}
+    fun stop() {
+        if (running) {
+            running = false
+            handler.removeCallbacksAndMessages(null)
+        }
+    }
 
-    /** Called when the countdown finishes. */
-    open fun onFinish() {}
+    fun isRunning(): Boolean = running
+
+    fun getRemainingDuration(): Long = remainingDuration
+
+    abstract fun onLoop(remainingDuration: Long)
+    abstract fun onFinish()
 }
-
-
 
 
 /*package com.lock.focus
