@@ -20,7 +20,7 @@ abstract class Loop {
 
         handler.postDelayed({
             val elapsed = SystemClock.elapsedRealtime() - startTime
-            remainingDuration -= interval
+            
 
             // Correction: if elapsed time is far ahead of expected time
             val expectedRemaining = remainingDuration
@@ -30,6 +30,9 @@ abstract class Loop {
             if (drift > 1000) { // if there's over 1s drift (due to doze or sleep)
                 remainingDuration = actualRemaining
             }
+else{
+remainingDuration -= interval
+}
 
             onLoop(remainingDuration)
             scheduleLoop()
