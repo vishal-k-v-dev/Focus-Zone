@@ -19,7 +19,7 @@ class _WhitelistedNotificationsListState extends State<WhitelistedNotificationsL
         floatingActionButton: FloatingActionButton.small(
           onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => WhitelistNotificationsSelector(onPop: () => setState((){})))), //onStartPress, 
           backgroundColor: Colors.greenAccent,
-          child: const Icon(Icons.edit)
+          child: const Icon(Icons.edit, color: Colors.black)
         ),
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
