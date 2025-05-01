@@ -77,10 +77,12 @@ class MainActivity : FlutterActivity() {
             }
             
             else if(call.method == "AccessibilityEnabled") {
-                val accessibilityEnabled = Settings.Secure.getInt(
+                /*val accessibilityEnabled = Settings.Secure.getInt(
                     contentResolver,
                     Settings.Secure.ACCESSIBILITY_ENABLED, 0
-                ) == 1
+                ) == 1*/
+
+val accessibilityEnabled = isMyAccessibilityServiceEnabled(this)
                 result.success(accessibilityEnabled)
             }
 
