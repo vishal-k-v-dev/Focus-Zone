@@ -114,3 +114,21 @@ class MainActivity : FlutterActivity() {
 }
 
 
+
+
+fun isMyAccessibilityServiceEnabled(context: Context): Boolean {
+    val myService = ComponentName(context, MyAccessibilityService::class.java)
+    val enabledServicesSetting = Settings.Secure.getString(
+        context.contentResolver,
+        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+    ) ?: return false
+
+    val enabledServices = enabledServicesSetting.split(":")
+    for (service in enabledServices) {
+        val enabledComponent = ComponentName.unflattenFromString(service)
+        if (enabledComponent != null && enabledComponent == myService) {
+            return true
+        }
+    }
+    return false
+}
