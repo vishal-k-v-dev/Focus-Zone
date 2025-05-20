@@ -169,12 +169,31 @@ class BlockView(val context: Context){
                 title = "$duration Minutes",
                 disabled = duration > getMaximumBreakDuration(context),
                 onPressed = {
+
+
+                    if(duration <= getMaximumBreakDuration(context) ){
+
+
+
                     hideAllScreens()
                     breakActiveScreen.visibility = View.VISIBLE
                     saveInt(context, "break_session", getBreaksCount(context) - 1)
                     val breakBroadcastIntent = Intent("com.lock.focus.START_BREAK")
                     breakBroadcastIntent.putExtra("break_duration", duration*60000)
                     context.sendBroadcast(breakBroadcastIntent)
+
+
+
+
+
+
+                }
+
+
+
+
+
+
                 }
             )
             breaksList.addView(buttonView)
